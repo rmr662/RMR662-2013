@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Joystick;
  * @author Dan Mercer
  *
  */
-final class JoystickThread extends Thread {
+public final class JoystickThread extends Thread {
 	private static final int NUM_OF_BUTTONS = 5;
 
 	private volatile boolean ending;

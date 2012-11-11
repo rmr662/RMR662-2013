@@ -1,18 +1,13 @@
- package com.frc2013.rmr662.system;
+ package com.frc2013.rmr662.system.generic;
 
-import com.frc2013.rmr662.system.generic.RobotMode;
-import com.frc2013.rmr662.system.generic.TeleopMode;
+import com.frc2013.rmr662.system.JoystickThread;
 
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Watchdog;
 
-public abstract class Robot /* TODO extends SimpleRobot*/ {
+public abstract class Robot extends SimpleRobot {
 	private RobotMode mode;
 	private JoystickThread joystickThread;
-	
-	protected void robotInit() {
-		Watchdog.getInstance().kill();
-	}
 
 //	@Override
 	public final void autonomous() {
@@ -29,7 +24,7 @@ public abstract class Robot /* TODO extends SimpleRobot*/ {
 	public final void operatorControl() {
 		TeleopMode mode = getTeleOpMode();
 		this.mode = mode;
-		this.joystickThread = new JoystickThread(null /* Initialize Joysticks */);
+		this.joystickThread = new JoystickThread(null /* TODO Initialize Joysticks */);
 		joystickThread.setMode(mode);
 		joystickThread.start();
 		mode.start();

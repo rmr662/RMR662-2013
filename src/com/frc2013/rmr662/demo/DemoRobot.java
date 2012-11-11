@@ -1,6 +1,6 @@
 package com.frc2013.rmr662.demo;
 
-import com.frc2013.rmr662.system.Robot;
+import com.frc2013.rmr662.system.generic.Robot;
 import com.frc2013.rmr662.system.generic.RobotMode;
 import com.frc2013.rmr662.system.generic.TeleopMode;
 
