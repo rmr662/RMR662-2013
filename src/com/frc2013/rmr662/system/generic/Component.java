@@ -1,24 +1,17 @@
 package com.frc2013.rmr662.system.generic;
 
-import edu.wpi.first.wpilibj.Watchdog;
-
 /**
  * @author Dan Mercer
  * 
  */
 public abstract class Component extends Thread {
-	private final boolean feedWatchdog;
-
 	private volatile boolean ending = false;
 
 	/**
 	 * Constructs a new Component.
-	 * 
-	 * @param motors
-	 *            <code>true</code> if this Component runs the motors.
 	 */
-	protected Component(boolean motors) {
-		this.feedWatchdog = motors;
+	protected Component() {
+		// Nothing necessary here.
 	}
 
 	/**
@@ -35,9 +28,6 @@ public abstract class Component extends Thread {
 		while (!ending) {
 			synchronized (this) {
 				update();
-			}
-			if (feedWatchdog) {
-				Watchdog.getInstance().feed();
 			}
 		}
 		onEnd();

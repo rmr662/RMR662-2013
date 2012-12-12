@@ -2,8 +2,8 @@
 
 import com.frc2013.rmr662.system.JoystickThread;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SimpleRobot;
-import edu.wpi.first.wpilibj.Watchdog;
 
 public abstract class Robot extends SimpleRobot {
 	private RobotMode mode;
@@ -22,14 +22,23 @@ public abstract class Robot extends SimpleRobot {
 
 //	@Override
 	public final void operatorControl() {
-		TeleopMode mode = getTeleOpMode();
+		final TeleopMode mode = getTeleOpMode();
 		this.mode = mode;
-		this.joystickThread = new JoystickThread(null /* TODO Initialize Joysticks */);
+		this.joystickThread = new JoystickThread(getJoysticks());
 		joystickThread.setMode(mode);
 		joystickThread.start();
 		mode.start();
+		while (isOperatorControl()) {
+			Watchdog.getInstance().check(); // TODO left off here
+			wait(100);
+		}
 	}
 	
+	/**
+	 * @return An array of {@link Joystick}s to use for input
+	 */
+	protected abstract Joystick[] getJoysticks();
+
 	/**
 	 * @return A {@link TeleopMode} to use for autonomous mode
 	 */
