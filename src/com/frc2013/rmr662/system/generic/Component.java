@@ -1,42 +1,49 @@
 package com.frc2013.rmr662.system.generic;
 
+import com.frc2013.rmr662.system.Fluffy;
+
 /**
+ * Represents a component of the robot. Subclasses should implement
+ * {@link #update()}. Subclasses can also override {@link #onBegin()} and/or
+ * {@link #onEnd()} as desired.
+ * 
  * @author Dan Mercer
  * 
  */
 public abstract class Component extends Thread {
 	private volatile boolean ending = false;
+	
+	// Final methods
 
 	/**
-	 * Constructs a new Component.
-	 */
-	protected Component() {
-		// Nothing necessary here.
-	}
-
-	/**
-	 * @deprecated Do not call this method. It should only be called by the system.
+	 * @deprecated Do not call this method. It should only be called by the
+	 *             system.
 	 * @see java.lang.Thread#run()
 	 */
 	@Override
 	public final void run() {
+
 		if (Thread.currentThread() != this) {
 			throw new UnsupportedOperationException(
 					"Do not call Component.run()");
 		}
 		onBegin();
 		while (!ending) {
-			synchronized (this) {
-				update();
-			}
+			update();
 		}
+		Fluffy.INSTANCE.feed(this);
 		onEnd();
 	}
 
+	/**
+	 * Call this to end the Component thread
+	 */
 	public final void end() {
 		this.ending = true;
 	}
 	
+	// Subclass methods
+
 	/**
 	 * Called when the Component begins. Override this to do something here.
 	 */
@@ -48,7 +55,6 @@ public abstract class Component extends Thread {
 	 */
 	protected void onEnd() {
 	}
-
 
 	/**
 	 * Called repeatedly while the component is enabled. This method is called

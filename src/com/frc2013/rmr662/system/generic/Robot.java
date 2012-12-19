@@ -1,15 +1,17 @@
  package com.frc2013.rmr662.system.generic;
 
+import com.frc2013.rmr662.system.Fluffy;
 import com.frc2013.rmr662.system.JoystickThread;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SimpleRobot;
 
 public abstract class Robot extends SimpleRobot {
+	private static final int[] JOYSTICK_PORTS = null;
+	
 	private RobotMode mode;
 	private JoystickThread joystickThread;
 
-//	@Override
+	@Override
 	public final void autonomous() {
 		this.mode = getAutoMode();
 		mode.start();
@@ -20,35 +22,36 @@ public abstract class Robot extends SimpleRobot {
 	 */
 	protected abstract RobotMode getAutoMode();
 
-//	@Override
+	@Override
 	public final void operatorControl() {
-		final TeleopMode mode = getTeleOpMode();
-		this.mode = mode;
-		this.joystickThread = new JoystickThread(getJoysticks());
-		joystickThread.setMode(mode);
+		// Init
+		this.mode = getTeleOpMode();
+		this.joystickThread = new JoystickThread(JOYSTICK_PORTS);
+		joystickThread.setMode((TeleopMode) mode);
+		
+		// Start
 		joystickThread.start();
 		mode.start();
+		
+		// Loop
 		while (isOperatorControl()) {
-			Watchdog.getInstance().check(); // TODO left off here
-			wait(100);
+			Fluffy.INSTANCE.update(); // TODO left off here
 		}
+		
+		// Shut down
+		joystickThread.end();
+		joystickThread = null;
+		mode.end();
+		mode = null;
 	}
 	
 	/**
-	 * @return An array of {@link Joystick}s to use for input
-	 */
-	protected abstract Joystick[] getJoysticks();
-
-	/**
-	 * @return A {@link TeleopMode} to use for autonomous mode
+	 * @return A {@link TeleopMode} to use for teleop mode
 	 */
 	protected abstract TeleopMode getTeleOpMode();
 
-//	@Override
+	@Override
 	protected final void disabled() {
-		if (joystickThread != null) {
-			joystickThread.end();
-		}
 		onDisabled();
 	}
 

@@ -40,6 +40,9 @@ public abstract class RobotMode extends Thread {
 		// Can be overridden by subclasses
 	}
 
+	/**
+	 * Called to end the RobotMode thread
+	 */
 	public final void end() {
 		ending = true;
 	}
