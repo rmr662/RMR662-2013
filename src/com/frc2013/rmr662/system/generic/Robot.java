@@ -11,7 +11,7 @@ public abstract class Robot extends SimpleRobot {
 	private RobotMode mode;
 	private JoystickThread joystickThread;
 
-	@Override
+//	@Override
 	public final void autonomous() {
 		this.mode = getAutoMode();
 		mode.start();
@@ -22,11 +22,12 @@ public abstract class Robot extends SimpleRobot {
 	 */
 	protected abstract RobotMode getAutoMode();
 
-	@Override
+//	@Override
 	public final void operatorControl() {
 		// Init
-		this.mode = getTeleOpMode();
-		this.joystickThread = new JoystickThread(JOYSTICK_PORTS);
+		final TeleopMode mode = getTeleOpMode();
+		this.mode = mode;
+		this.joystickThread = new JoystickThread(mode.getJoystickPorts());
 		joystickThread.setMode((TeleopMode) mode);
 		
 		// Start
@@ -34,32 +35,21 @@ public abstract class Robot extends SimpleRobot {
 		mode.start();
 		
 		// Loop
+		final Fluffy fluffy = Fluffy.getInstance();
 		while (isOperatorControl()) {
-			Fluffy.INSTANCE.update(); // TODO left off here
+			fluffy.update(); 
 		}
 		
 		// Shut down
 		joystickThread.end();
 		joystickThread = null;
-		mode.end();
-		mode = null;
+		this.mode.end();
+		this.mode = null;
 	}
 	
 	/**
 	 * @return A {@link TeleopMode} to use for teleop mode
 	 */
 	protected abstract TeleopMode getTeleOpMode();
-
-	@Override
-	protected final void disabled() {
-		onDisabled();
-	}
-
-	/**
-	 * Override this to do something here.
-	 */
-	private void onDisabled() {
-		// Override this to do something here.
-	}
 
 }

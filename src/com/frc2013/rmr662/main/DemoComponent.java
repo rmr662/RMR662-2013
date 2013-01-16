@@ -1,4 +1,4 @@
-package com.frc2013.rmr662.demo;
+package com.frc2013.rmr662.main;
 
 import com.frc2013.rmr662.system.generic.Component;
 
@@ -11,7 +11,7 @@ public class DemoComponent extends Component {
 	/* (non-Javadoc)
 	 * @see com.frc2013.rmr662.system.generic.Component#update()
 	 */
-	@Override
+//	@Override
 	protected void update() {
 		// TODO Stuff goes here
 

@@ -1,7 +1,5 @@
 package com.frc2013.rmr662.system.generic;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import com.frc2013.rmr662.system.ButtonEvent;
 
 /**
@@ -12,10 +10,11 @@ import com.frc2013.rmr662.system.ButtonEvent;
  * 
  */
 public abstract class TeleopMode extends RobotMode {
-	private final ConcurrentLinkedQueue<ButtonEvent> events;
-
-	public TeleopMode() {
-		events = new ConcurrentLinkedQueue<ButtonEvent>();
+	private ButtonEvent buttonEvent;
+	private boolean buttonEventIsRead = true;
+	
+	public TeleopMode(String name) {
+	    super(name);
 	}
 
 	/**
@@ -26,18 +25,31 @@ public abstract class TeleopMode extends RobotMode {
 	 *            The ButtonEvent
 	 */
 	public final void addButtonEvent(ButtonEvent be) {
-		events.add(be);
+		synchronized (this) {
+		    if (buttonEventIsRead) {
+			buttonEvent = be;
+			buttonEventIsRead = true;
+		    }
+		}
 	}
-
-	@Override
+	
+	public abstract int[] getJoystickPorts();
+	
+	/**
+	 * TODO Left off here
+	 */
+//	@Override
 	protected void loop() {
-		// Handle events
-		for (ButtonEvent be : events) {
+		// Handle event
+		synchronized(this) {
+		    if (!buttonEventIsRead) {
+			final ButtonEvent be = buttonEvent;
 			if (be.change == ButtonEvent.PRESSED) {
 				onButtonPressed(be);
 			} else {
 				onButtonReleased(be);
 			}
+		    }
 		}
 	}
 

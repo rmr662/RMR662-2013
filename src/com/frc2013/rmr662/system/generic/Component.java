@@ -11,7 +11,12 @@ import com.frc2013.rmr662.system.Fluffy;
  * 
  */
 public abstract class Component extends Thread {
+	private final int index;
 	private volatile boolean ending = false;
+	
+	public Component() {
+	    index = Fluffy.getInstance().getNewIndex();
+	}
 	
 	// Final methods
 
@@ -20,18 +25,17 @@ public abstract class Component extends Thread {
 	 *             system.
 	 * @see java.lang.Thread#run()
 	 */
-	@Override
+//	@Override
 	public final void run() {
-
 		if (Thread.currentThread() != this) {
-			throw new UnsupportedOperationException(
-					"Do not call Component.run()");
+			throw new Error("Do not call Component.run()");
 		}
+		
 		onBegin();
 		while (!ending) {
 			update();
 		}
-		Fluffy.INSTANCE.feed(this);
+		Fluffy.getInstance().feed(index);
 		onEnd();
 	}
 
