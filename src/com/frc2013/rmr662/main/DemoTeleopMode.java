@@ -1,30 +1,25 @@
 package com.frc2013.rmr662.main;
 
-import com.frc2013.rmr662.system.ButtonEvent;
-import com.frc2013.rmr662.system.generic.TeleopMode;
+import com.frc2013.rmr662.system.generic.RobotMode;
 
-public class DemoTeleopMode extends TeleopMode {
-    
-    public DemoTeleopMode() {
-	super("DemoTeleopMode");
-	System.out.println(Thread.currentThread().getName() + ": MY ROFLCOPTER GOES");
-    }
+/**
+ * @author Dan Mercer
+ *
+ */
+public class DemoTeleopMode extends RobotMode {
 
-    public int[] getJoystickPorts() {
-	return new int[]{1, 2};
-    }
+	public DemoTeleopMode() {
+		super("DemoTeleopMode");
+	}
 
-//  @Override
-    protected void onButtonPressed(ButtonEvent be) {
-	System.out.println(Thread.currentThread().getName() + ": Button pressed.");
-    }
-
-//  @Override
-    protected void loop() {
-	super.loop();
-
-	// STUFF GOES HERE
-	System.out.println(Thread.currentThread().getName() + ": ROFL");
-
-    }
+	/**
+	 * Called repeatedly while the mode is running
+	 * 
+	 * @see com.frc2013.rmr662.system.generic.RobotMode#loop()
+	 */
+	@Override
+	protected void loop() {
+		// STUFF HERE
+	}
+	
 }
