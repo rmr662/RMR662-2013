@@ -14,7 +14,7 @@ public abstract class Robot extends SimpleRobot {
 		
 		// Loop
 		final Fluffy fluffy = Fluffy.getInstance();
-		while (isAutonomous()) {
+		while (isEnabled() && isAutonomous()) {
 			fluffy.update();
 		}
 		
@@ -35,7 +35,7 @@ public abstract class Robot extends SimpleRobot {
 		
 		// Loop
 		final Fluffy fluffy = Fluffy.getInstance();
-		while (isOperatorControl()) {
+		while (isEnabled() && isOperatorControl()) {
 			fluffy.update();
 		}
 		
