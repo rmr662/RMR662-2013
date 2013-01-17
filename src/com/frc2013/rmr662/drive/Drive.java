@@ -7,40 +7,83 @@ import edu.wpi.first.wpilibj.Joystick;
 /** Drive Component */
 public class Drive extends Component {
     
-    public static final int LEFT_SPEED = 0;
-    public static final int RIGHT_SPEED = 1;
+    public static final int LEFT = 0;
+    public static final int RIGHT = 1;
     
-    public static final int LEFT_JOYSTICK = 0;
-    public static final int RIGHT_JOYSTICK = 1;
+    //public static final int LEFT_MOTOR = 0;
+    //public static final int RIGHT_MOTOR = 1;
     
-    public static final int LEFT_MOTOR = 0;
-    public static final int RIGHT_MOTOR = 1;
-    
-    private Jaguar[] m_motors;
-    //private Joystick[] m_joysticks;
-    private double[] m_speeds;
+    private Jaguar[] m_motors = {null, null};
+    private Joystick[] m_joysticks = {null, null};
+    private double[] m_speeds = {0d , 0d};
+    private double[] arcadeAxes = {0d , 0d};
     private boolean m_changed;
+    private boolean pidEnabled = false;
+    
+    public Drive () {
+	m_motors[LEFT] = new Jaguar(LEFT+1);
+	m_motors[RIGHT] = new Jaguar(RIGHT+1);
+	
+	m_joysticks[LEFT] = new Joystick(LEFT+1);
+	m_joysticks[RIGHT] = new Joystick(RIGHT+1);
+    }
     
     public Drive(Jaguar[] motors) {
 	m_motors = motors;
-	m_speeds = new double[2];
 	m_changed = false;
 	//m_joysticks = joysticks;
     }
     
     // @Override
     public synchronized void update() {
-	m_motors[LEFT_MOTOR].set(m_speeds[LEFT_SPEED]);
-	m_motors[RIGHT_MOTOR].set(m_speeds[RIGHT_SPEED]);
+	setAxisValues(m_joysticks);
+	System.out.println("x = " + arcadeAxes[LEFT] + " y = " + arcadeAxes[RIGHT]);
+	arcadeDrive(arcadeAxes[LEFT], arcadeAxes[RIGHT]);
     }
     
+    /**
+     * Sets the speeds to send to each side motor
+     * 
+     * @param left The speed to send to the left motors
+     * @param right  The speed to send to the right motors
+     */
     public synchronized void setSpeeds(double left, double right) {
-	m_speeds[LEFT_SPEED] = left;
-	m_speeds[RIGHT_SPEED] = right;
+	m_speeds[LEFT] = left;
+	m_speeds[RIGHT] = right;
 	m_changed = true;
     }
     
-    public synchronized void arcadeDrive(double xAxis, double yAxis) {
-	
+    /**
+     * Drives the robot arcade-style by calculating from two axes
+     * 
+     * @param xAxis The x-axis to use
+     * @param yAxis The y-axis to use
+     */
+    public synchronized void arcadeDrive(double yAxis, double xAxis) {
+	if (pidEnabled == false) {
+	    if (yAxis > 0.0) {
+		if (xAxis > 0.0) {
+		    setSpeeds(yAxis-xAxis, Math.max(yAxis, xAxis));
+		}
+		else {
+		    setSpeeds(Math.max(yAxis, -xAxis), yAxis+xAxis);
+		}
+	    }
+	    else {
+		if (xAxis > 0.0) {
+		    setSpeeds(-Math.max(-yAxis, xAxis), yAxis+xAxis);
+		}
+		else {
+		    setSpeeds(yAxis-xAxis, -Math.max(-yAxis, -xAxis));
+		}
+	    }
+	}
+	m_motors[LEFT].set(m_speeds[LEFT]);
+	m_motors[RIGHT].set(m_speeds[RIGHT]);
+    }
+    
+    public void setAxisValues(Joystick[] joysticks) {
+	arcadeAxes[LEFT] = joysticks[LEFT].getY();
+	arcadeAxes[RIGHT] = joysticks[RIGHT].getX();
     }
 }

@@ -12,4 +12,8 @@ public class DemoAutoMode extends RobotMode {
     protected void loop() {
 	// STUFF GOES HERE
     }
+    
+    protected void onEnd() {
+	// END STUFF GOES HERE
+    }
 }

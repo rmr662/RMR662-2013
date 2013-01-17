@@ -18,12 +18,17 @@ public abstract class RobotMode extends Thread {
     public final void run() {
 	// begin
 	onBegin();
-	while (!ending) {
+	while (!isEnding()) {
 	    // Call loop() method
 	    loop();
 	}
+	System.out.println("RobotMode ending");
 	// end
 	onEnd();
+    }
+    
+    private synchronized boolean isEnding() {
+	return ending;
     }
 
     /**
@@ -43,14 +48,13 @@ public abstract class RobotMode extends Thread {
      * Called before the RobotMode finishes running. Override this to do
      * something here.
      */
-    protected void onEnd() {
-	// Can be overridden by subclasses
-    }
+    protected abstract void onEnd();
 
     /**
      * Called to end the RobotMode thread
      */
-    public final void end() {
+    public final synchronized void end() {
 	ending = true;
+	
     }
 }
