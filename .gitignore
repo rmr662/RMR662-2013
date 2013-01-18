@@ -1,3 +1,9 @@
+build.xml
+build/
+resources/
+nbproject/
+build.properties
+
 #################
 ## Eclipse
 #################
