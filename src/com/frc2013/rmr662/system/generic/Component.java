@@ -34,8 +34,8 @@ public abstract class Component extends Thread {
 		onBegin();
 		while (!ending) {
 			update();
+			WatchdogAggregator.getInstance().feed(index);
 		}
-		WatchdogAggregator.getInstance().feed(index);
 		onEnd();
 	}
 
