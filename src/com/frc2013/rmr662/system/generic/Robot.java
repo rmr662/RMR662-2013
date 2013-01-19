@@ -1,6 +1,6 @@
 package com.frc2013.rmr662.system.generic;
 
-import com.frc2013.rmr662.system.Fluffy;
+import com.frc2013.rmr662.system.WatchdogAggregator;
 
 import edu.wpi.first.wpilibj.SimpleRobot;
 
@@ -13,7 +13,7 @@ public abstract class Robot extends SimpleRobot {
 		mode.start();
 		
 		// Loop
-		final Fluffy fluffy = Fluffy.getInstance();
+		final WatchdogAggregator fluffy = WatchdogAggregator.getInstance();
 		while (isEnabled() && isAutonomous()) {
 			fluffy.update();
 		}
@@ -34,7 +34,7 @@ public abstract class Robot extends SimpleRobot {
 		mode.start();
 		
 		// Loop
-		final Fluffy fluffy = Fluffy.getInstance();
+		final WatchdogAggregator fluffy = WatchdogAggregator.getInstance();
 		while (isEnabled() && isOperatorControl()) {
 			fluffy.update();
 		}

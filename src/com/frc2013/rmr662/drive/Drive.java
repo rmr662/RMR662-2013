@@ -24,7 +24,7 @@ public class Drive extends Component {
 	m_motors[LEFT] = new Jaguar(LEFT+1);
 	m_motors[RIGHT] = new Jaguar(RIGHT+1);
 	
-	m_joysticks[LEFT] = new Joystick(LEFT+1);
+	m_joysticks[LEFT] = new Joystick(3);
 	m_joysticks[RIGHT] = new Joystick(RIGHT+1);
     }
     
@@ -83,7 +83,7 @@ public class Drive extends Component {
     }
     
     public void setAxisValues(Joystick[] joysticks) {
-	arcadeAxes[LEFT] = joysticks[LEFT].getY();
-	arcadeAxes[RIGHT] = joysticks[RIGHT].getX();
+	arcadeAxes[LEFT] = joysticks[LEFT].getRawAxis(2);
+	arcadeAxes[RIGHT] = joysticks[LEFT].getRawAxis(4);
     }
 }

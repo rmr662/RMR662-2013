@@ -10,14 +10,14 @@ import edu.wpi.first.wpilibj.Watchdog;
  *
  * @author Dan Mercer
  */
-public class Fluffy {
+public class WatchdogAggregator {
     // Singleton instance
-    private static Fluffy instance;
+    private static WatchdogAggregator instance;
 
-    public static Fluffy getInstance() {
-	synchronized (Fluffy.class) {
+    public static WatchdogAggregator getInstance() {
+	synchronized (WatchdogAggregator.class) {
 	    if (instance == null) {
-		instance = new Fluffy();
+		instance = new WatchdogAggregator();
 	    }
 	}
 	return instance;
@@ -31,7 +31,7 @@ public class Fluffy {
     private int nextNewIndex = 0;
 
     // Constructor
-    private Fluffy() {
+    private WatchdogAggregator() {
 	components = new boolean[NUM_OF_COMPONENTS];
 	watchdog = Watchdog.getInstance();
     }

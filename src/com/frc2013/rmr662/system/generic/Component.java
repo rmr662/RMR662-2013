@@ -1,6 +1,6 @@
 package com.frc2013.rmr662.system.generic;
 
-import com.frc2013.rmr662.system.Fluffy;
+import com.frc2013.rmr662.system.WatchdogAggregator;
 
 /**
  * Represents a component of the robot. Subclasses should implement
@@ -15,7 +15,7 @@ public abstract class Component extends Thread {
 	private volatile boolean ending = false;
 	
 	public Component() {
-	    index = Fluffy.getInstance().getNewIndex();
+	    index = WatchdogAggregator.getInstance().getNewIndex();
 	}
 	
 	// Final methods
@@ -35,7 +35,7 @@ public abstract class Component extends Thread {
 		while (!ending) {
 			update();
 		}
-		Fluffy.getInstance().feed(index);
+		WatchdogAggregator.getInstance().feed(index);
 		onEnd();
 	}
 
