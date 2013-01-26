@@ -7,21 +7,20 @@ import com.frc2013.rmr662.system.generic.RobotMode;
  * @author Dan Mercer
  *
  */
-public class DemoTeleopMode extends RobotMode {
+public class TeleopMode extends RobotMode {
+    public static final int XBOX_JOYSTICK_PORT = 3;
+    
     private final Drive drive;
 
-    public DemoTeleopMode() {
+    public TeleopMode() {
 	super("DemoTeleopMode");
 	drive = new Drive();
+    }
+    
+    protected void onBegin() {
 	drive.start();
     }
 
-    /**
-     * Called repeatedly while the mode is running
-     *
-     * @see com.frc2013.rmr662.system.generic.RobotMode#loop()
-     */
-    // @Override
     protected void loop() {
 	// STUFF HERE
     }

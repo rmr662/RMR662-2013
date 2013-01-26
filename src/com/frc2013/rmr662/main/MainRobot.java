@@ -1,18 +1,17 @@
 package com.frc2013.rmr662.main;
 
+import com.frc2013.rmr662.eastereggs.DanceMode;
 import com.frc2013.rmr662.system.generic.Robot;
 import com.frc2013.rmr662.system.generic.RobotMode;
 
-public class DemoRobot extends Robot {
+public class MainRobot extends Robot {
 
-//	@Override
 	protected RobotMode getAutoMode() {
-		return new DemoAutoMode();
+		return new DanceMode(); // No autonomous mode this season :(
 	}
 
-//	@Override
 	protected RobotMode getTeleopMode() {
-		return new DemoTeleopMode();
+		return new TeleopMode();
 	}
 
 }
