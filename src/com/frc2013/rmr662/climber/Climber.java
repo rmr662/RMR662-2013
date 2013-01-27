@@ -62,20 +62,20 @@ public class Climber extends Component {
     }
 
     public boolean sensor(int number) {
-	//return (sensors[number].get() != INVERTEDS[number]);
-	if (number == 0) {
-	    return sensors[2].get() != INVERTEDS[2];
-	} else if (number == 1) {
-	    return sensors[1].get() != INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
-	} else if (number == 2) {
-	    return sensors[1].get() != INVERTEDS[1] && sensors[2].get() != INVERTEDS[2];
-	} else if (number == 3) {
-	    return sensors[0].get() != INVERTEDS[0] && sensors[1].get() == INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
-	} else if (number == 4) {
-	    return sensors[0].get() != INVERTEDS[0] && sensors[1].get() == INVERTEDS[1] && sensors[2].get() != INVERTEDS[2];
-	} else {
-	    return sensors[0].get() != INVERTEDS[0] && sensors[1].get() != INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
-	}
+	return (sensors[number].get() != INVERTEDS[number]);
+//	if (number == 0) {
+//	    return sensors[2].get() != INVERTEDS[2];
+//	} else if (number == 1) {
+//	    return sensors[1].get() != INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
+//	} else if (number == 2) {
+//	    return sensors[1].get() != INVERTEDS[1] && sensors[2].get() != INVERTEDS[2];
+//	} else if (number == 3) {
+//	    return sensors[0].get() != INVERTEDS[0] && sensors[1].get() == INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
+//	} else if (number == 4) {
+//	    return sensors[0].get() != INVERTEDS[0] && sensors[1].get() == INVERTEDS[1] && sensors[2].get() != INVERTEDS[2];
+//	} else {
+//	    return sensors[0].get() != INVERTEDS[0] && sensors[1].get() != INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
+//	}
     }
 
     public boolean notOutOfBounds() {
