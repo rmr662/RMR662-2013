@@ -38,11 +38,22 @@ public class DanceMode extends RobotMode {
 	private final Jaguar motor = new Jaguar(Climber.MOTOR_PORT);
 	private final DigitalInput top = new DigitalInput(Climber.SENSOR0);
 	private final DigitalInput bottom = new DigitalInput(Climber.SENSOR1);
+	
+	public DanceManiupulator() {
+	    motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
+	}
 
 	protected void update() {
-	    
+            if (bottom.get() != Climber.INVERTEDS[0]) {
+                motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
+            }
+	    else if (top.get() != Climber.INVERTEDS[1]) {
+		motor.set(-.5 * Climber.MOTOR_DIRECTION_MULT);
+	    }		    
 	}
-	
+	public void onEnd() {
+	    motor.set(0);
+	}
     }
     
     private final DanceDrive drive;
