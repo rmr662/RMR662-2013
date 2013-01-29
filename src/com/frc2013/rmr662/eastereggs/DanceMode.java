@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj.Jaguar;
 
 public class DanceMode extends RobotMode {
 	
+	/**
+	 * The drive component for DanceMode
+	 */
 	private static class DanceDrive extends Component {
 		private static final int MOTOR_CHANNEL_LEFT = 1;
 		private static final int MOTOR_CHANNEL_RIGHT = 2;
@@ -34,19 +37,25 @@ public class DanceMode extends RobotMode {
 		}
 	}
 	
+	/**
+	 * The manipulator component for DanceMode
+	 */
 	private static class DanceManipulator extends Component {
+		private static final boolean INVERTED_BOTTOM = Climber.INVERTEDS[1];
+		private static final boolean INVERTED_TOP = Climber.INVERTEDS[0];
+		
 		private final Jaguar motor = new Jaguar(Climber.MOTOR_PORT);
 		private final DigitalInput top = new DigitalInput(Climber.SENSOR0);
 		private final DigitalInput bottom = new DigitalInput(Climber.SENSOR1);
 		
-		public DanceManipulator() {
+		protected void onBegin() {
 			motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
 		}
 		
 		protected void update() {
-			if (bottom.get() != Climber.INVERTEDS[0]) {
+			if (bottom.get() != INVERTED_BOTTOM) {
 				motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
-			} else if (top.get() != Climber.INVERTEDS[1]) {
+			} else if (top.get() != INVERTED_TOP) {
 				motor.set(-.5 * Climber.MOTOR_DIRECTION_MULT);
 			}
 		}
