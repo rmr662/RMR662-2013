@@ -41,8 +41,8 @@ public class DanceMode extends RobotMode {
 	 * The manipulator component for DanceMode
 	 */
 	private static class DanceManipulator extends Component {
-		private static final boolean INVERTED_BOTTOM = Climber.INVERTEDS[1];
-		private static final boolean INVERTED_TOP = Climber.INVERTEDS[0];
+		private static final boolean INVERTED_BOTTOM = Climber.INVERTED_1;
+		private static final boolean INVERTED_TOP = Climber.INVERTED_0;
 		
 		private final Jaguar motor = new Jaguar(Climber.MOTOR_PORT);
 		private final DigitalInput top = new DigitalInput(Climber.SENSOR0);

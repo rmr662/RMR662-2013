@@ -1,42 +1,55 @@
 package com.frc2013.rmr662.climber;
 
+import com.frc2013.rmr662.main.TeleopMode;
 import com.frc2013.rmr662.system.generic.Component;
-import edu.wpi.first.wpilibj.DigitalInput;
+import com.frc2013.rmr662.wrappers.RMRDigitalInput;
+import com.frc2013.rmr662.wrappers.RMRSolenoid;
+
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Solenoid;
 
-// for use on old code
 // TODO: set constants and fill in returnAxisVal()
 public class Climber extends Component {
-	// constants
 	
+	private static class EmergencyException extends Exception {
+		private static final long serialVersionUID = -7491961259340232519L;
+		// ^ This is just here to make Eclipse happy.
+	}
+	
+	// Constants
 	public static final int MOTOR_DIRECTION_MULT = 1;
 	public static final int PISTON_PORT = 1;
-	public static final boolean FIRED_IS1 = true;
-	public static final boolean[] INVERTEDS = { false, false, false, false,
-			false, false };
+	public static final boolean INVERTED_PISTON = true;
+	
+	public static final boolean INVERTED_0 = false;
+	public static final boolean INVERTED_1 = false;
+	public static final boolean INVERTED_2 = false;
+	public static final boolean INVERTED_3 = false;
+	public static final boolean INVERTED_4 = false;
+	public static final boolean INVERTED_5 = false;
+	
 	public static final int SENSOR0 = 1;
 	public static final int SENSOR1 = 2;
 	public static final int SENSOR2 = 3;
 	public static final int SENSOR3 = 4;
 	public static final int SENSOR4 = 5;
 	public static final int SENSOR5 = 6;
+	
 	public static final int MOTOR_PORT = 3;
 	public static final int JOYSTICK_BUTTON_INDEX_START_AUTO = 1;
 	public static final int JOYSTICK_BUTTON_INDEX_START_MAN = 2;
 	public static final int JOYSTICK_BUTTON_DOWN_AND_UP = 3;
-	public static final int JOYSTICK_PORT = 3;
-	// member declarations
-	Solenoid piston;
-	Jaguar motor;
-	DigitalInput[] sensors = new DigitalInput[6];
-	Joystick joystick;
+	public static final int JOYSTICK_PORT = TeleopMode.XBOX_JOYSTICK_PORT;
+	
+	// Fields
+	private RMRSolenoid piston;
+	private Jaguar motor;
+	private RMRDigitalInput[] sensors = new RMRDigitalInput[6];
+	private Joystick joystick;
 	/**
 	 * true if the tilt pneumatics have been fired.
 	 */
-	boolean isfired;
-	boolean isInEmergencyControl;
+	private boolean isFired;
 	
 	// sensors[0] is bottom limit
 	// sensors[1] is top limit
@@ -46,25 +59,34 @@ public class Climber extends Component {
 	// sensors[5] is top carriage hook
 	public Climber() {
 		// initialize member variables
-		piston = new Solenoid(PISTON_PORT);
-		sensors[0] = new DigitalInput(SENSOR0);
-		sensors[1] = new DigitalInput(SENSOR1);
-		sensors[2] = new DigitalInput(SENSOR2);
-		sensors[3] = new DigitalInput(SENSOR3);
-		sensors[4] = new DigitalInput(SENSOR4);
-		sensors[5] = new DigitalInput(SENSOR5);
+		piston = new RMRSolenoid(PISTON_PORT, INVERTED_PISTON);
+		sensors[0] = new RMRDigitalInput(SENSOR0, INVERTED_0);
+		sensors[1] = new RMRDigitalInput(SENSOR1, INVERTED_1);
+		sensors[2] = new RMRDigitalInput(SENSOR2, INVERTED_2);
+		sensors[3] = new RMRDigitalInput(SENSOR3, INVERTED_3);
+		sensors[4] = new RMRDigitalInput(SENSOR4, INVERTED_4);
+		sensors[5] = new RMRDigitalInput(SENSOR5, INVERTED_5);
 		motor = new Jaguar(MOTOR_PORT);
 		joystick = new Joystick(JOYSTICK_PORT);
-		isfired = false;
+		isFired = false;
 	}
 	
-	public void checkEmergencyButton() {
-		isInEmergencyControl = joystick
-				.getRawButton(JOYSTICK_BUTTON_INDEX_START_MAN);
+	/**
+	 * If the emergency button is pressed, stops the motor and throws an
+	 * EmergencyException.
+	 * 
+	 * @throws EmergencyException
+	 */
+	private void checkEmergencyButton() throws EmergencyException {
+		if (joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_MAN)) {
+			motor.set(0.0);
+			throw new EmergencyException();
+		}
 	}
 	
-	public boolean sensor(int number) {
-		return (sensors[number].get() != INVERTEDS[number]);
+	private boolean sensor(int number) {
+		return sensors[number].get();
+		// THIS CODE IS DEPRECATED!
 		// if (number == 0) {
 		// return sensors[2].get() != INVERTEDS[2];
 		// } else if (number == 1) {
@@ -85,17 +107,17 @@ public class Climber extends Component {
 		// }
 	}
 	
-	public boolean notOutOfBounds() {
+	private boolean notOutOfBounds() { // TODO: remove this, optimize for direction of travel
 		return (!sensor(0) && !sensor(1));
 	}
 	
-	// whatever we decide to use (triggers or stick things or d pad) return
-	// value from -1 to 1
-	public double returnAxisVal() {
-		return 0.0;// returnWhateverWeShouldHere
+	// whatever we decide to use for emergency control (triggers or stick things
+	// or d pad) return value from -1 to 1
+	private double returnAxisVal() {
+		return 0.0; // TODO: return something relevant to emergency control
 	}
 	
-	public void emergencyControl() {
+	private void emergencyControl() {
 		// allows for operator to move the carriage up and down *slowly*
 		while (!isEnding()) {
 			final double speed = returnAxisVal() * .25 * MOTOR_DIRECTION_MULT;
@@ -106,107 +128,77 @@ public class Climber extends Component {
 		}
 	}
 	
-	public void moveUpALevel() {
+	private void moveUpALevel() throws EmergencyException {
 		// while top stationary is hooked but top carriage is not, move carriage
 		// up
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
 		while (sensor(3) && !sensor(5) && notOutOfBounds()) {
 			checkEmergencyButton();
-			if (isInEmergencyControl) {
-				break;
-			}
 		}
-		motor.set(0);
-		if (isInEmergencyControl) {
-			return;
-		}
+		motor.set(0); 
+		// TODO: is it necessary stop the motors before going the other direction?
 		// while middle stationary is not hooked but top carriage is hooked,
 		// move carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
 		while (!sensor(2) && sensor(5) && notOutOfBounds()) {
 			checkEmergencyButton();
-			if (isInEmergencyControl) {
-				break;
-			}
 		}
 		motor.set(0);
-		if (isInEmergencyControl) {
-			return;
-		}
 		// while middle stationary is hooked but bottom carriage is not, move
 		// carriage up
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
 		while (sensor(2) && !sensor(4) && notOutOfBounds()) {
 			checkEmergencyButton();
-			if (isInEmergencyControl) {
-				break;
-			}
 		}
 		motor.set(0);
-		if (isInEmergencyControl) {
-			return;
-		}
 		// while top stationary is not hooked but top carriage is hooked, move
 		// carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
 		while (!sensor(3) && sensor(4) && notOutOfBounds()) {
 			checkEmergencyButton();
-			if (isInEmergencyControl) {
-				break;
-			}
 		}
 		motor.set(0);
 	}
 	
-	public void autoClimb() {
-		// make it so that this code will not execute again
-		isfired = true;
+	private void autoClimb() throws EmergencyException {
 		// tilt robot into position
-		piston.set(FIRED_IS1);
+		piston.set(true);
 		// wait until the top hook is locked in
 		while (!sensor(3)) {
 			// (do nothing)
 		}
+		piston.set(false); // TODO: is it necessary to retract piston?
 		moveUpALevel();
-		if (isInEmergencyControl) {
-			return;
-		}
+		// TODO: something here?
 		moveUpALevel();
-		if (isInEmergencyControl) {
-			return;
-		}
+		
 		// code to prevent robot touching second rung
 		// while top stationary is hooked but top carriage is not, move carriage
 		// up
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
 		while (sensor(3) && !sensor(5) && notOutOfBounds()) {
 			checkEmergencyButton();
-			if (isInEmergencyControl) {
-				break;
-			}
 		}
 		motor.set(0);
-		if (isInEmergencyControl) {
-			return;
-		}
 		// while middle stationary is not hooked but top carriage is hooked,
 		// move carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
 		while (!sensor(2) && sensor(5) && notOutOfBounds()) {
 			checkEmergencyButton();
-			if (isInEmergencyControl) {
-				break;
-			}
 		}
 		motor.set(0);
 	}
 	
-	public void update() {
-		if (!isfired && joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_AUTO)) {
-			autoClimb();
-			if (isInEmergencyControl) {
+	protected void update() {
+		if (!isFired && joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_AUTO)) {
+			// make it so that this code will not execute again
+			isFired = true;
+			try {
+				autoClimb();
+			} catch (EmergencyException e) {
 				emergencyControl();
 			}
+			
 			// ends thread
 			end();
 		}
