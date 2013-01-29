@@ -1,8 +1,12 @@
-build.xml
+# directories
 build/
 resources/
 nbproject/
+lib/
+
+# project files
 build.properties
+build.xml
 
 #################
 ## Eclipse
