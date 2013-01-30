@@ -5,13 +5,20 @@ import com.frc2013.rmr662.system.generic.Robot;
 import com.frc2013.rmr662.system.generic.RobotMode;
 
 public class MainRobot extends Robot {
+    
+        private RobotMode autoMode;
+        private RobotMode teleopMode;
+        
+        public MainRobot() {
+            teleopMode = new TeleopMode();
+        }
 
 	protected RobotMode getAutoMode() {
-		return new DanceMode(); // No autonomous mode this season :(
+		return autoMode;
 	}
 
 	protected RobotMode getTeleopMode() {
-		return new TeleopMode();
+		return teleopMode;
 	}
 
 }
