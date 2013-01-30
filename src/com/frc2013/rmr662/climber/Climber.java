@@ -1,6 +1,7 @@
 package com.frc2013.rmr662.climber;
 
 import com.frc2013.rmr662.main.TeleopMode;
+import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
 import com.frc2013.rmr662.wrappers.RMRSolenoid;
@@ -59,14 +60,15 @@ public class Climber extends Component {
 	// sensors[5] is top carriage hook
 	public Climber() {
 		// initialize member variables
-		piston = new RMRSolenoid(PISTON_PORT, INVERTED_PISTON);
-		sensors[0] = new RMRDigitalInput(SENSOR0, INVERTED_0);
-		sensors[1] = new RMRDigitalInput(SENSOR1, INVERTED_1);
-		sensors[2] = new RMRDigitalInput(SENSOR2, INVERTED_2);
-		sensors[3] = new RMRDigitalInput(SENSOR3, INVERTED_3);
-		sensors[4] = new RMRDigitalInput(SENSOR4, INVERTED_4);
-		sensors[5] = new RMRDigitalInput(SENSOR5, INVERTED_5);
-		motor = new Jaguar(MOTOR_PORT);
+		piston = HardwarePool.getInstance().getSolenoid(PISTON_PORT, INVERTED_PISTON);
+		sensors[0] = HardwarePool.getInstance().getDigitalInput(SENSOR0, INVERTED_0);
+		sensors[1] = HardwarePool.getInstance().getDigitalInput(SENSOR1, INVERTED_1);
+		sensors[2] = HardwarePool.getInstance().getDigitalInput(SENSOR2, INVERTED_2);
+		sensors[3] = HardwarePool.getInstance().getDigitalInput(SENSOR3, INVERTED_3);
+		sensors[4] = HardwarePool.getInstance().getDigitalInput(SENSOR4, INVERTED_4);
+		sensors[5] = HardwarePool.getInstance().getDigitalInput(SENSOR5, INVERTED_5);
+		motor = HardwarePool.getInstance().getJaguar(MOTOR_PORT);
+		
 		joystick = new Joystick(JOYSTICK_PORT);
 		isFired = false;
 	}

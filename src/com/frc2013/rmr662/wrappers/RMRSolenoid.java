@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.Solenoid;
  * 
  */
 public class RMRSolenoid extends Solenoid {
-	private final boolean inverted;
+	public final boolean inverted;
 	
 	/**
 	 * @param channel

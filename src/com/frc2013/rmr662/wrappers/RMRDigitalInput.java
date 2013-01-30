@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
  *
  */
 public class RMRDigitalInput extends DigitalInput {
-	private final boolean inverted;
+	public final boolean inverted;
 
 	/**
 	 * @param channel

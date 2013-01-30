@@ -1,6 +1,7 @@
 package com.frc2013.rmr662.drive;
 
 import com.frc2013.rmr662.main.TeleopMode;
+import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
@@ -22,8 +23,8 @@ public class Drive extends Component {
     private boolean pidEnabled = false;
     
     public Drive () {
-	m_motors[LEFT] = new Jaguar(LEFT+1);
-	m_motors[RIGHT] = new Jaguar(RIGHT+1);
+	m_motors[LEFT] = HardwarePool.getInstance().getJaguar(LEFT+1);
+	m_motors[RIGHT] = HardwarePool.getInstance().getJaguar(RIGHT+1);
 	
 	m_joysticks[LEFT] = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
 	m_joysticks[RIGHT] = new Joystick(RIGHT+1);
