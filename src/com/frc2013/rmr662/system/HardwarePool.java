@@ -51,7 +51,7 @@ public class HardwarePool {
 			
 		} else { // Other type of hardware already exists on that channel
 			
-			throw new IllegalStateException("A " + o.getClass().getSimpleName()
+			throw new IllegalStateException("A " + o.getClass().getName()
 					+ " has already been initialized on channel " + channel);
 		}
 	}
@@ -87,7 +87,7 @@ public class HardwarePool {
 		} else { // Other type of hardware already exists on that channel
 			
 			throw new IllegalArgumentException("A "
-					+ o.getClass().getSimpleName()
+					+ o.getClass().getName()
 					+ " has already been initialized on channel " + channel);
 		}
 	}
@@ -117,7 +117,7 @@ public class HardwarePool {
 			
 		} else { // Other type of hardware already exists on that channel
 			
-			throw new IllegalStateException("A " + o.getClass().getSimpleName()
+			throw new IllegalStateException("A " + o.getClass().getName()
 					+ " has already been initialized on channel " + channel);
 		}
 	}
