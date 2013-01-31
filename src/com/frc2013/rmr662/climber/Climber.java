@@ -8,8 +8,13 @@ import com.frc2013.rmr662.wrappers.RMRSolenoid;
 
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Servo;
 
-// TODO: set constants and fill in returnAxisVal()
+// TODO: fill in returnAxisVal()
+// TODO: abort in the checkEmergency and emergencyControl methods, should be able to abort in auto directly
+// TODO: refactor so that numbers are constants for names
+// TODO: refactor so that sensor() method is getSensor() in all places
+// TODO: replace notoutofbounds with limitswitch checking, to be specific to each case, up or down
 public class Climber extends Component {
 	
 	private static class EmergencyException extends Exception {
@@ -18,38 +23,51 @@ public class Climber extends Component {
 	}
 	
 	// Constants
-	public static final int MOTOR_DIRECTION_MULT = 1;
 	public static final int PISTON_PORT = 1;
-	public static final boolean INVERTED_PISTON = true;
-	
-	public static final boolean INVERTED_0 = false;
+	public static final boolean INVERTED_PISTON = false; // if hardware is inverted
+// sensor inversions	
+	public static final boolean INVERTED_0 = false; 
 	public static final boolean INVERTED_1 = false;
 	public static final boolean INVERTED_2 = false;
 	public static final boolean INVERTED_3 = false;
 	public static final boolean INVERTED_4 = false;
 	public static final boolean INVERTED_5 = false;
-	
+// port numbers
+// need actual digital ports from wiring	
 	public static final int SENSOR0 = 1;
 	public static final int SENSOR1 = 2;
 	public static final int SENSOR2 = 3;
 	public static final int SENSOR3 = 4;
 	public static final int SENSOR4 = 5;
 	public static final int SENSOR5 = 6;
-	
 	public static final int MOTOR_PORT = 3;
+// carriage motor 
+// change to negative if inverted	
+	public static final int MOTOR_DIRECTION_MULT = 1;
+// figure out buttons	
 	public static final int JOYSTICK_BUTTON_INDEX_START_AUTO = 1;
 	public static final int JOYSTICK_BUTTON_INDEX_START_MAN = 2;
 	public static final int JOYSTICK_BUTTON_DOWN_AND_UP = 3;
 	public static final int JOYSTICK_PORT = TeleopMode.XBOX_JOYSTICK_PORT;
+// ports for the servos
+// get from wiring
+	public static final int SERVO0 = 1;
+	public static final int SERVO1 = 2;
+	public static final int SERVO2 = 3;
+	public static final int SERVO3 = 4;
+// figure out what values stop the hook, and what values allow the hook to move	
+	public static final double SERVO_FALSE = 0.0;
+	public static final double SERVO_TRUE = 1.0;
 	
 	// Fields
 	private RMRSolenoid piston;
 	private Jaguar motor;
 	private RMRDigitalInput[] sensors = new RMRDigitalInput[6];
 	private Joystick joystick;
-	/**
-	 * true if the tilt pneumatics have been fired.
-	 */
+	private Servo[] servos = new Servo[4];
+	// code that starts climb is in the update() method
+	// update method is called many times
+	// 
 	private boolean isFired;
 	
 	// sensors[0] is bottom limit
@@ -60,6 +78,7 @@ public class Climber extends Component {
 	// sensors[5] is top carriage hook
 	public Climber() {
 		// initialize member variables
+
 		piston = HardwarePool.getInstance().getSolenoid(PISTON_PORT, INVERTED_PISTON);
 		sensors[0] = HardwarePool.getInstance().getDigitalInput(SENSOR0, INVERTED_0);
 		sensors[1] = HardwarePool.getInstance().getDigitalInput(SENSOR1, INVERTED_1);
@@ -68,6 +87,15 @@ public class Climber extends Component {
 		sensors[4] = HardwarePool.getInstance().getDigitalInput(SENSOR4, INVERTED_4);
 		sensors[5] = HardwarePool.getInstance().getDigitalInput(SENSOR5, INVERTED_5);
 		motor = HardwarePool.getInstance().getJaguar(MOTOR_PORT);
+		
+		servos[0] = new Servo(SERVO0);
+		servos[1] = new Servo(SERVO1);
+		servos[2] = new Servo(SERVO2);
+		servos[3] = new Servo(SERVO3);
+		// servos[0] is the servo for the stationary middle hook
+		// servos[1] is the servo for the stationary top hook
+		// servos[2] is the servo for the carriage bottom hook
+		// servos[3] is the servo for the carriage top hook
 		
 		joystick = new Joystick(JOYSTICK_PORT);
 		isFired = false;
@@ -85,7 +113,7 @@ public class Climber extends Component {
 			throw new EmergencyException();
 		}
 	}
-	
+	// returns 
 	private boolean sensor(int number) {
 		return sensors[number].get();
 		// THIS CODE IS DEPRECATED!
@@ -108,7 +136,7 @@ public class Climber extends Component {
 		// INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
 		// }
 	}
-	
+	// check 
 	private boolean notOutOfBounds() { // TODO: remove this, optimize for direction of travel
 		return (!sensor(0) && !sensor(1));
 	}
@@ -121,30 +149,79 @@ public class Climber extends Component {
 	
 	private void emergencyControl() {
 		// allows for operator to move the carriage up and down *slowly*
+		boolean servoOn0 = false;
+		boolean servoOn1 = false;
+		boolean servoOn2 = false;
+		boolean servoOn3 = false;
 		while (!isEnding()) {
 			final double speed = returnAxisVal() * .25 * MOTOR_DIRECTION_MULT;
-			if (speed == 0 || (speed > 0 && !sensor(1))
+//			if ((speed == 0 && !sensor(0) && !sensor(1)) || (speed > 0 && !sensor(1))
+//					|| (speed < 0 && !sensor(0))) {
+//				motor.set(speed);
+//			}
+			// do not allow the carriage to go past limit switches
+			if ((speed > 0 && !sensor(1))
 					|| (speed < 0 && !sensor(0))) {
 				motor.set(speed);
+			}
+			// use servos to lock in the hook
+			if (sensor(2)) {
+				servos[0].set(SERVO_TRUE);
+				servoOn0 = true;		
+			}
+			else if (servoOn0) {
+				servos[0].set(SERVO_FALSE);
+				servoOn0 = false;
+			}
+			if (sensor(3)) {
+				servos[1].set(SERVO_TRUE);
+				servoOn1 = true;
+			}
+			else if (servoOn1) {
+				servos[1].set(SERVO_FALSE);
+				servoOn1 = false;
+			}
+			if (sensor(4)) {
+				servos[2].set(SERVO_TRUE);
+				servoOn2 = true;
+			}
+			else if (servoOn2) {
+				servos[2].set(SERVO_FALSE);
+				servoOn2 = false;
+			}
+			if (sensor(5)) {
+				servos[3].set(SERVO_TRUE);
+				servoOn3 = true;
+			}
+			else if (servoOn3) {
+				servos[3].set(SERVO_FALSE);
+				servoOn3 = false;
 			}
 		}
 	}
 	
 	private void moveUpALevel() throws EmergencyException {
+		// moveUpAlevel can be used two times to move up the first two levels.
 		// while top stationary is hooked but top carriage is not, move carriage
 		// up
+		servos[1].set(SERVO_TRUE); // lock in the top stationary hooks
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
 		while (sensor(3) && !sensor(5) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
+		servos[3].set(SERVO_TRUE); // lock in the top carriage hooks
+		servos[1].set(SERVO_FALSE); // free the top stationary hooks
 		motor.set(0); 
 		// TODO: is it necessary stop the motors before going the other direction?
 		// while middle stationary is not hooked but top carriage is hooked,
 		// move carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
 		while (!sensor(2) && sensor(5) && notOutOfBounds()) {
-			checkEmergencyButton();
+			checkEmergencyButton(); //TODO: sleep about 50 ms in every one of these
+//			Thread.sleep(50);
 		}
+		servos[0].set(SERVO_TRUE); // lock in the bottom stationary hooks
+		servos[3].set(SERVO_FALSE); // free the top carriage hooks
 		motor.set(0);
 		// while middle stationary is hooked but bottom carriage is not, move
 		// carriage up
@@ -152,13 +229,17 @@ public class Climber extends Component {
 		while (sensor(2) && !sensor(4) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
+		servos[2].set(SERVO_TRUE); // lock in the bottom carriage hooks
+		servos[0].set(SERVO_FALSE); // free the bottom stationary hooks
 		motor.set(0);
-		// while top stationary is not hooked but top carriage is hooked, move
+		// while top stationary is not hooked but bottom carriage is hooked, move
 		// carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
 		while (!sensor(3) && sensor(4) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
+		servos[1].set(SERVO_TRUE); // lock in the top stationary hooks
+		servos[2].set(SERVO_FALSE); // free the bottom carriage hooks
 		motor.set(0);
 	}
 	
@@ -169,7 +250,7 @@ public class Climber extends Component {
 		while (!sensor(3)) {
 			// (do nothing)
 		}
-		piston.set(false); // TODO: is it necessary to retract piston?
+		//piston.set(false); // TODO: is it necessary to retract piston?
 		moveUpALevel();
 		// TODO: something here?
 		moveUpALevel();
@@ -191,6 +272,7 @@ public class Climber extends Component {
 		motor.set(0);
 	}
 	
+	
 	protected void update() {
 		if (!isFired && joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_AUTO)) {
 			// make it so that this code will not execute again
@@ -204,5 +286,14 @@ public class Climber extends Component {
 			// ends thread
 			end();
 		}
+		else if (!isFired && joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_MAN)) {
+			piston.set(true);
+			emergencyControl();
+			isFired = true;
+		}
+		// in case we think of something to do after the robot has started climbing
+		//else {
+			
+		//}
 	}
 }
