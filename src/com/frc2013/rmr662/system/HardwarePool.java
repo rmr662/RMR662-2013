@@ -1,5 +1,6 @@
 package com.frc2013.rmr662.system;
 
+import com.frc2013.rmr662.wrappers.Invertable;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
 import com.frc2013.rmr662.wrappers.RMRSolenoid;
 
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj.Jaguar;
 
 /**
  * A pool of Jaguars, RMRSolenoids, RMRDigitalInputs, etc.
+ * TODO: Make getWhatever methods static for neater use
  */
 public class HardwarePool {
 	// Singleton stuff
@@ -36,24 +38,16 @@ public class HardwarePool {
 	 * @return
 	 */
 	public synchronized Jaguar getJaguar(int channel) {
-		ensureArrayFits(channel);
+		Jaguar o = (Jaguar) getObject(channel,
+				Jaguar.class);
 		
-		final Object o = hardwares[channel];
 		if (o == null) { // Need to create a new Jaguar
+		
+			o = new Jaguar(channel);
+			hardwares[channel] = o;
 			
-			final Jaguar jaguar = new Jaguar(channel);
-			hardwares[channel] = jaguar;
-			return jaguar;
-			
-		} else if (o instanceof Jaguar) { // Jaguar already exists on that channel
-			
-			return (Jaguar) o;
-			
-		} else { // Other type of hardware already exists on that channel
-			
-			throw new IllegalStateException("A " + o.getClass().getName()
-					+ " has already been initialized on channel " + channel);
 		}
+		return o;
 	}
 	
 	/**
@@ -64,61 +58,52 @@ public class HardwarePool {
 	 * @return
 	 */
 	public synchronized RMRSolenoid getSolenoid(int channel, boolean inverted) {
-		ensureArrayFits(channel);
+		RMRSolenoid o = (RMRSolenoid) getObject(channel,
+				RMRSolenoid.class, inverted);
 		
-		final Object o = hardwares[channel];
 		if (o == null) { // Need to create a new RMRSolenoid
-			
-			final RMRSolenoid solenoid = new RMRSolenoid(channel, inverted);
-			hardwares[channel] = solenoid;
-			return solenoid;
-			
-		} else if (o instanceof RMRSolenoid) { // RMRSolenoid on that channel already exists
-			
-			final RMRSolenoid solenoid = (RMRSolenoid) o;
-			if (solenoid.inverted != inverted) {
-				System.err
-						.println("The RMRSolenoid that already exists on channel "
-								+ channel
-								+ " does not match the requested inversion.");
-			}
-			return solenoid;
-			
-		} else { // Other type of hardware already exists on that channel
-			
-			throw new IllegalArgumentException("A "
-					+ o.getClass().getName()
-					+ " has already been initialized on channel " + channel);
+		
+			o = new RMRSolenoid(channel, inverted);
+			hardwares[channel] = o;
 		}
+		return o;
 	}
 	
 	public synchronized RMRDigitalInput getDigitalInput(int channel,
 			boolean inverted) {
-		ensureArrayFits(channel);
+		RMRDigitalInput o = (RMRDigitalInput) getObject(channel,
+				RMRDigitalInput.class, inverted);
 		
-		final Object o = hardwares[channel];
 		if (o == null) { // Need to create a new RMRDigitalInput
+		
+			o = new RMRDigitalInput(channel, inverted);
+			hardwares[channel] = o;
 			
-			final RMRDigitalInput digitalInput = new RMRDigitalInput(channel,
-					inverted);
-			hardwares[channel] = digitalInput;
-			return digitalInput;
-			
-		} else if (o instanceof RMRDigitalInput) { // RMRDigitalInput on that channel already exists
-			
-			final RMRDigitalInput digitalInput = (RMRDigitalInput) o;
-			if (digitalInput.inverted != inverted) {
-				System.err
-						.println("The RMRSolenoid that already exists on channel "
-								+ channel
-								+ " does not match the requested inversion.");
+		}
+		return o;
+	}
+	
+	private Object getObject(int channel, Class c) {
+		return getObject(channel, c, false);
+	}
+	
+	private Object getObject(int channel, Class c, boolean inverted) {
+		ensureArrayFits(channel);
+		final Object o = hardwares[channel];
+		if (o != null) {
+			if (o.getClass() == c) {
+				if (o instanceof Invertable
+						&& ((Invertable) o).isInverted() != inverted) {
+					System.err.println("The " + c.getName() + " (" + channel
+							+ ") does not match the requested inversion.");
+				}
+				return o;
+			} else {
+				throw new IllegalStateException("A " + o.getClass().getName()
+						+ " has already been initialized on channel " + channel);
 			}
-			return digitalInput;
-			
-		} else { // Other type of hardware already exists on that channel
-			
-			throw new IllegalStateException("A " + o.getClass().getName()
-					+ " has already been initialized on channel " + channel);
+		} else {
+			return o;
 		}
 	}
 	
