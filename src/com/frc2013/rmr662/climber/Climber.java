@@ -1,5 +1,8 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.frc2013.rmr662.climber;
-
 import com.frc2013.rmr662.main.TeleopMode;
 import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
@@ -25,13 +28,7 @@ public class Climber extends Component {
 	// Constants
 	public static final int PISTON_PORT = 1;
 	public static final boolean INVERTED_PISTON = false; // if hardware is inverted
-// sensor inversions	
-	public static final boolean INVERTED_0 = false; 
-	public static final boolean INVERTED_1 = false;
-	public static final boolean INVERTED_2 = false;
-	public static final boolean INVERTED_3 = false;
-	public static final boolean INVERTED_4 = false;
-	public static final boolean INVERTED_5 = false;
+
 // port numbers
 // need actual digital ports from wiring	
 	public static final int SENSOR0 = 1;
@@ -70,6 +67,13 @@ public class Climber extends Component {
 	// 
 	private boolean isFired;
 	
+	public static final int BOTTOM_LIMIT = 0;
+	public static final int TOP_LIMIT = 1;
+	public static final int MIDDLE_STATIONARY = 2;
+	public static final int TOP_STATIONARY = 3;
+	public static final int BOTTOM_CARRIAGE = 4;
+	public static final int TOP_CARRIAGE = 5;
+	
 	// sensors[0] is bottom limit
 	// sensors[1] is top limit
 	// sensors[2] is stationary middle hook
@@ -80,14 +84,14 @@ public class Climber extends Component {
 		// initialize member variables
 
 		piston = HardwarePool.getInstance().getSolenoid(PISTON_PORT, INVERTED_PISTON);
-		sensors[0] = HardwarePool.getInstance().getDigitalInput(SENSOR0, INVERTED_0);
-		sensors[1] = HardwarePool.getInstance().getDigitalInput(SENSOR1, INVERTED_1);
-		sensors[2] = HardwarePool.getInstance().getDigitalInput(SENSOR2, INVERTED_2);
-		sensors[3] = HardwarePool.getInstance().getDigitalInput(SENSOR3, INVERTED_3);
-		sensors[4] = HardwarePool.getInstance().getDigitalInput(SENSOR4, INVERTED_4);
-		sensors[5] = HardwarePool.getInstance().getDigitalInput(SENSOR5, INVERTED_5);
+		sensors[0] = HardwarePool.getInstance().getDigitalInput(SENSOR0, false);
+		sensors[1] = HardwarePool.getInstance().getDigitalInput(SENSOR1, false);
+		sensors[2] = HardwarePool.getInstance().getDigitalInput(SENSOR2, false);
+		sensors[3] = HardwarePool.getInstance().getDigitalInput(SENSOR3, false);
+		sensors[4] = HardwarePool.getInstance().getDigitalInput(SENSOR4, false);
+		sensors[5] = HardwarePool.getInstance().getDigitalInput(SENSOR5, false);
 		motor = HardwarePool.getInstance().getJaguar(MOTOR_PORT);
-		
+
 		servos[0] = new Servo(SERVO0);
 		servos[1] = new Servo(SERVO1);
 		servos[2] = new Servo(SERVO2);
@@ -114,7 +118,7 @@ public class Climber extends Component {
 		}
 	}
 	// returns 
-	private boolean sensor(int number) {
+	private boolean getSensor(int number) {
 		return sensors[number].get();
 		// THIS CODE IS DEPRECATED!
 		// if (number == 0) {
@@ -138,7 +142,7 @@ public class Climber extends Component {
 	}
 	// check 
 	private boolean notOutOfBounds() { // TODO: remove this, optimize for direction of travel
-		return (!sensor(0) && !sensor(1));
+		return (!getSensor(BOTTOM_LIMIT) && !getSensor(TOP_LIMIT));
 	}
 	
 	// whatever we decide to use for emergency control (triggers or stick things
@@ -160,12 +164,13 @@ public class Climber extends Component {
 //				motor.set(speed);
 //			}
 			// do not allow the carriage to go past limit switches
-			if ((speed > 0 && !sensor(1))
-					|| (speed < 0 && !sensor(0))) {
+
+			if ((speed > 0 && !getSensor(TOP_LIMIT))
+					|| (speed < 0 && !getSensor(BOTTOM_LIMIT))) {
 				motor.set(speed);
 			}
 			// use servos to lock in the hook
-			if (sensor(2)) {
+			if (getSensor(MIDDLE_STATIONARY)) {
 				servos[0].set(SERVO_TRUE);
 				servoOn0 = true;		
 			}
@@ -173,15 +178,18 @@ public class Climber extends Component {
 				servos[0].set(SERVO_FALSE);
 				servoOn0 = false;
 			}
-			if (sensor(3)) {
+			
+			if (getSensor(TOP_STATIONARY)) {
 				servos[1].set(SERVO_TRUE);
 				servoOn1 = true;
 			}
+			
 			else if (servoOn1) {
 				servos[1].set(SERVO_FALSE);
 				servoOn1 = false;
 			}
-			if (sensor(4)) {
+			
+			if (getSensor(BOTTOM_CARRIAGE)) {
 				servos[2].set(SERVO_TRUE);
 				servoOn2 = true;
 			}
@@ -189,7 +197,8 @@ public class Climber extends Component {
 				servos[2].set(SERVO_FALSE);
 				servoOn2 = false;
 			}
-			if (sensor(5)) {
+			
+			if (getSensor(TOP_CARRIAGE)) {
 				servos[3].set(SERVO_TRUE);
 				servoOn3 = true;
 			}
@@ -206,7 +215,7 @@ public class Climber extends Component {
 		// up
 		servos[1].set(SERVO_TRUE); // lock in the top stationary hooks
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
-		while (sensor(3) && !sensor(5) && notOutOfBounds()) {
+		while (getSensor(TOP_STATIONARY) && !getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
 		servos[3].set(SERVO_TRUE); // lock in the top carriage hooks
@@ -216,7 +225,8 @@ public class Climber extends Component {
 		// while middle stationary is not hooked but top carriage is hooked,
 		// move carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
-		while (!sensor(2) && sensor(5) && notOutOfBounds()) {
+		
+		while (!getSensor(MIDDLE_STATIONARY) && getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton(); //TODO: sleep about 50 ms in every one of these
 //			Thread.sleep(50);
 		}
@@ -226,7 +236,7 @@ public class Climber extends Component {
 		// while middle stationary is hooked but bottom carriage is not, move
 		// carriage up
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
-		while (sensor(2) && !sensor(4) && notOutOfBounds()) {
+		while (getSensor(MIDDLE_STATIONARY) && !getSensor(BOTTOM_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
 		servos[2].set(SERVO_TRUE); // lock in the bottom carriage hooks
@@ -235,7 +245,7 @@ public class Climber extends Component {
 		// while top stationary is not hooked but bottom carriage is hooked, move
 		// carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
-		while (!sensor(3) && sensor(4) && notOutOfBounds()) {
+		while (!getSensor(TOP_STATIONARY) && getSensor(BOTTOM_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
 		servos[1].set(SERVO_TRUE); // lock in the top stationary hooks
@@ -247,7 +257,7 @@ public class Climber extends Component {
 		// tilt robot into position
 		piston.set(true);
 		// wait until the top hook is locked in
-		while (!sensor(3)) {
+		while (!getSensor(TOP_STATIONARY)) {
 			// (do nothing)
 		}
 		//piston.set(false); // TODO: is it necessary to retract piston?
@@ -259,14 +269,14 @@ public class Climber extends Component {
 		// while top stationary is hooked but top carriage is not, move carriage
 		// up
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
-		while (sensor(3) && !sensor(5) && notOutOfBounds()) {
+		while (getSensor(TOP_STATIONARY) && !getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
 		motor.set(0);
 		// while middle stationary is not hooked but top carriage is hooked,
 		// move carriage down, robot up
 		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
-		while (!sensor(2) && sensor(5) && notOutOfBounds()) {
+		while (!getSensor(MIDDLE_STATIONARY) && getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
 		motor.set(0);
