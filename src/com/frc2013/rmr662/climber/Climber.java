@@ -53,8 +53,8 @@ public class Climber extends Component {
 	public static final int SERVO2 = 3;
 	public static final int SERVO3 = 4;
 // figure out what values stop the hook, and what values allow the hook to move	
-	public static final double SERVO_FALSE = 0.0;
-	public static final double SERVO_TRUE = 1.0;
+	public static final double SERVO_UNLOCK = 0.0;
+	public static final double SERVO_LOCK = 1.0;
 	
 	// Fields
 	private RMRSolenoid piston;
@@ -171,39 +171,39 @@ public class Climber extends Component {
 			}
 			// use servos to lock in the hook
 			if (getSensor(MIDDLE_STATIONARY)) {
-				servos[0].set(SERVO_TRUE);
+				servos[0].set(SERVO_LOCK);
 				servoOn0 = true;		
 			}
 			else if (servoOn0) {
-				servos[0].set(SERVO_FALSE);
+				servos[0].set(SERVO_UNLOCK);
 				servoOn0 = false;
 			}
 			
 			if (getSensor(TOP_STATIONARY)) {
-				servos[1].set(SERVO_TRUE);
+				servos[1].set(SERVO_LOCK);
 				servoOn1 = true;
 			}
 			
 			else if (servoOn1) {
-				servos[1].set(SERVO_FALSE);
+				servos[1].set(SERVO_UNLOCK);
 				servoOn1 = false;
 			}
 			
 			if (getSensor(BOTTOM_CARRIAGE)) {
-				servos[2].set(SERVO_TRUE);
+				servos[2].set(SERVO_LOCK);
 				servoOn2 = true;
 			}
 			else if (servoOn2) {
-				servos[2].set(SERVO_FALSE);
+				servos[2].set(SERVO_UNLOCK);
 				servoOn2 = false;
 			}
 			
 			if (getSensor(TOP_CARRIAGE)) {
-				servos[3].set(SERVO_TRUE);
+				servos[3].set(SERVO_LOCK);
 				servoOn3 = true;
 			}
 			else if (servoOn3) {
-				servos[3].set(SERVO_FALSE);
+				servos[3].set(SERVO_UNLOCK);
 				servoOn3 = false;
 			}
 		}
@@ -213,13 +213,13 @@ public class Climber extends Component {
 		// moveUpAlevel can be used two times to move up the first two levels.
 		// while top stationary is hooked but top carriage is not, move carriage
 		// up
-		servos[1].set(SERVO_TRUE); // lock in the top stationary hooks
+		servos[1].set(SERVO_LOCK); // lock in the top stationary hooks
 		motor.set(0.5 * MOTOR_DIRECTION_MULT);
 		while (getSensor(TOP_STATIONARY) && !getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
-		servos[3].set(SERVO_TRUE); // lock in the top carriage hooks
-		servos[1].set(SERVO_FALSE); // free the top stationary hooks
+		servos[3].set(SERVO_LOCK); // lock in the top carriage hooks
+		servos[1].set(SERVO_UNLOCK); // free the top stationary hooks
 		motor.set(0); 
 		// TODO: is it necessary stop the motors before going the other direction?
 		// while middle stationary is not hooked but top carriage is hooked,
@@ -230,8 +230,8 @@ public class Climber extends Component {
 			checkEmergencyButton(); //TODO: sleep about 50 ms in every one of these
 //			Thread.sleep(50);
 		}
-		servos[0].set(SERVO_TRUE); // lock in the bottom stationary hooks
-		servos[3].set(SERVO_FALSE); // free the top carriage hooks
+		servos[0].set(SERVO_LOCK); // lock in the bottom stationary hooks
+		servos[3].set(SERVO_UNLOCK); // free the top carriage hooks
 		motor.set(0);
 		// while middle stationary is hooked but bottom carriage is not, move
 		// carriage up
@@ -239,8 +239,8 @@ public class Climber extends Component {
 		while (getSensor(MIDDLE_STATIONARY) && !getSensor(BOTTOM_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
-		servos[2].set(SERVO_TRUE); // lock in the bottom carriage hooks
-		servos[0].set(SERVO_FALSE); // free the bottom stationary hooks
+		servos[2].set(SERVO_LOCK); // lock in the bottom carriage hooks
+		servos[0].set(SERVO_UNLOCK); // free the bottom stationary hooks
 		motor.set(0);
 		// while top stationary is not hooked but bottom carriage is hooked, move
 		// carriage down, robot up
@@ -248,8 +248,8 @@ public class Climber extends Component {
 		while (!getSensor(TOP_STATIONARY) && getSensor(BOTTOM_CARRIAGE) && notOutOfBounds()) {
 			checkEmergencyButton();
 		}
-		servos[1].set(SERVO_TRUE); // lock in the top stationary hooks
-		servos[2].set(SERVO_FALSE); // free the bottom carriage hooks
+		servos[1].set(SERVO_LOCK); // lock in the top stationary hooks
+		servos[2].set(SERVO_UNLOCK); // free the bottom carriage hooks
 		motor.set(0);
 	}
 	
@@ -305,5 +305,19 @@ public class Climber extends Component {
 		//else {
 			
 		//}
+	}
+
+	/**
+	 * Neutralize all hardware states here. (i.e. stop motor, reset solenoids, etc.)
+	 * @author Dan
+	 */
+	protected void onEnd() {
+		motor.set(0.0);
+		final Servo[] servos = this.servos;
+		final int length = servos.length;
+		
+		for (int i = 0; i < length; i++) {
+			servos[i].set(SERVO_LOCK);
+		}
 	}
 }

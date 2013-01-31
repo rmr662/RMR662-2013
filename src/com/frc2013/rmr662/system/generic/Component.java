@@ -43,6 +43,11 @@ public abstract class Component extends Thread {
 	 * Call this to end the Component thread
 	 */
 	public final void end() {
+		if (!(this.ending || this.isAlive())) {
+			onEnd();
+			// Thread has crashed/died prematurely, so call onEnd() to
+			// allow subclasses to neutralize hardware states.
+		}
 		this.ending = true;
 	}
 	
@@ -61,10 +66,10 @@ public abstract class Component extends Thread {
 	}
 	
 	/**
-	 * Called before the Component ends. Override this to do something here.
+	 * Called before the Component ends. All subclasses should neutralize
+	 * hardware states in this method.
 	 */
-	protected void onEnd() {
-	}
+	protected abstract void onEnd();
 	
 	/**
 	 * Called repeatedly while the component is enabled. This method is called

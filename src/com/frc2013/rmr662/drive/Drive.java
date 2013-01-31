@@ -88,4 +88,13 @@ public class Drive extends Component {
 	arcadeAxes[LEFT] = joysticks[LEFT].getRawAxis(2);
 	arcadeAxes[RIGHT] = joysticks[LEFT].getRawAxis(4);
     }
+
+	protected void onEnd() {
+		final Jaguar[] motors = m_motors;
+		final int length = motors.length;
+		
+		for (int i = 0; i < length; i++) {
+			motors[i].set(0.0);
+		}
+	}
 }
