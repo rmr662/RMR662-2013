@@ -1,5 +1,6 @@
 package com.frc2013.rmr662.drive;
 
+import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Jaguar;
@@ -45,9 +46,10 @@ public class Drive extends Component {
     private boolean tuningEnabled = true;
     
     public Drive () {
+	final HardwarePool pool = HardwarePool.getInstance();
 	for(int i = 0; i < MOTOR_CHANNELS.length; i++) {
-	    motors[i] = new Jaguar(MOTOR_CHANNELS[i]);
-	    encoders[i] = new Encoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
+	    motors[i] = pool.getJaguar(MOTOR_CHANNELS[i]);
+	    encoders[i] = pool.getEncoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
 	    encoders[i].setDistancePerPulse(DISTANCE_PER_PULSE);
 	    encoders[i].setPIDSourceParameter(Encoder.PIDSourceParameter.kRate);
 	    controllers[i] = new PIDController(KP[i], KI[i], KD[i], encoders[i], motors[i]);

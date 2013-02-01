@@ -1,9 +1,8 @@
 package com.frc2013.rmr662.eastereggs;
 
+import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.system.generic.RobotMode;
-import com.frc2013.rmr662.climber.Climber;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Jaguar;
 
 public class DanceMode extends RobotMode {
@@ -19,8 +18,9 @@ public class DanceMode extends RobotMode {
 		private final Jaguar leftMotor, rightMotor;
 		
 		public DanceDrive() {
-			leftMotor = new Jaguar(MOTOR_CHANNEL_LEFT);
-			rightMotor = new Jaguar(MOTOR_CHANNEL_RIGHT);
+			HardwarePool pool = HardwarePool.getInstance();
+			leftMotor = pool.getJaguar(MOTOR_CHANNEL_LEFT);
+			rightMotor = pool.getJaguar(MOTOR_CHANNEL_RIGHT);
 		}
 		
 		protected void onBegin() {

@@ -4,6 +4,7 @@
  */
 package com.frc2013.rmr662.pneumatic;
 
+import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import edu.wpi.first.wpilibj.Compressor;
 
@@ -22,7 +23,7 @@ public class PneumaticSystem extends Component {
     
     public PneumaticSystem() {
         super();
-        compressor = new Compressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
+        compressor = HardwarePool.getInstance().getCompressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
     }
     
     protected void onBegin() {

@@ -82,20 +82,20 @@ public class Climber extends Component {
 	// sensors[5] is top carriage hook
 	public Climber() {
 		// initialize member variables
+		final HardwarePool pool = HardwarePool.getInstance();
+		piston = pool.getSolenoid(PISTON_PORT, INVERTED_PISTON);
+		sensors[0] = pool.getDigitalInput(SENSOR0, false);
+		sensors[1] = pool.getDigitalInput(SENSOR1, false);
+		sensors[2] = pool.getDigitalInput(SENSOR2, false);
+		sensors[3] = pool.getDigitalInput(SENSOR3, false);
+		sensors[4] = pool.getDigitalInput(SENSOR4, false);
+		sensors[5] = pool.getDigitalInput(SENSOR5, false);
+		motor = pool.getJaguar(MOTOR_PORT);
 
-		piston = HardwarePool.getInstance().getSolenoid(PISTON_PORT, INVERTED_PISTON);
-		sensors[0] = HardwarePool.getInstance().getDigitalInput(SENSOR0, false);
-		sensors[1] = HardwarePool.getInstance().getDigitalInput(SENSOR1, false);
-		sensors[2] = HardwarePool.getInstance().getDigitalInput(SENSOR2, false);
-		sensors[3] = HardwarePool.getInstance().getDigitalInput(SENSOR3, false);
-		sensors[4] = HardwarePool.getInstance().getDigitalInput(SENSOR4, false);
-		sensors[5] = HardwarePool.getInstance().getDigitalInput(SENSOR5, false);
-		motor = HardwarePool.getInstance().getJaguar(MOTOR_PORT);
-
-		servos[0] = new Servo(SERVO0);
-		servos[1] = new Servo(SERVO1);
-		servos[2] = new Servo(SERVO2);
-		servos[3] = new Servo(SERVO3);
+		servos[0] = pool.getServo(SERVO0);
+		servos[1] = pool.getServo(SERVO1);
+		servos[2] = pool.getServo(SERVO2);
+		servos[3] = pool.getServo(SERVO3);
 		// servos[0] is the servo for the stationary middle hook
 		// servos[1] is the servo for the stationary top hook
 		// servos[2] is the servo for the carriage bottom hook
