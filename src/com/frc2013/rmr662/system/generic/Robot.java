@@ -68,4 +68,8 @@ public abstract class Robot extends SimpleRobot {
      * @return A {@link RobotMode} to use for teleop mode
      */
     protected abstract RobotMode getTeleopMode();
+    
+    protected void disabled() {
+	System.gc();
+    }
 }

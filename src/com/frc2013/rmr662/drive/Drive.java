@@ -42,8 +42,8 @@ public class Drive extends Component {
     private double relativeITuning = 0.0001;
     private double relativeDTuning = 0.01;
     
-    private boolean pidEnabled = true;
-    private boolean tuningEnabled = true;
+    private boolean pidEnabled = false;
+    private boolean tuningEnabled = false;
     
     public Drive () {
 	final HardwarePool pool = HardwarePool.getInstance();

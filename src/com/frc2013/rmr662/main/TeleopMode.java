@@ -12,17 +12,17 @@ public class TeleopMode extends RobotMode {
     public static final int XBOX_JOYSTICK_PORT = 3;
     
     private final Drive drive;
-    private final PneumaticSystem pneumaticSystem;
+//    private final PneumaticSystem pneumaticSystem;
 
     public TeleopMode() {
 	super("DemoTeleopMode");
 	drive = new Drive();
-        pneumaticSystem = new PneumaticSystem();
+//        pneumaticSystem = new PneumaticSystem();
     }
     
     protected void onBegin() {
 	drive.start();
-        pneumaticSystem.start();
+//        pneumaticSystem.start();
     }
 
     protected void loop() {
@@ -31,6 +31,6 @@ public class TeleopMode extends RobotMode {
     
     protected void onEnd() {
 	drive.end();
-        pneumaticSystem.end();
+//        pneumaticSystem.end();
     }
 }

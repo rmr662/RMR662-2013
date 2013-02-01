@@ -11,7 +11,7 @@ import com.frc2013.rmr662.system.WatchdogAggregator;
  * 
  */
 public abstract class Component extends Thread {
-	
+	private final boolean DEBUG = true;
 	private final int index;
 	private volatile boolean ending = false;
 	
@@ -37,6 +37,9 @@ public abstract class Component extends Thread {
 			WatchdogAggregator.getInstance().feed(index);
 		}
 		onEnd();
+		if (DEBUG) {
+		    System.out.println(getClass().getName() + " ended normally");
+		}
 	}
 	
 	/**
@@ -47,6 +50,9 @@ public abstract class Component extends Thread {
 			onEnd();
 			// Thread has crashed/died prematurely, so call onEnd() to
 			// allow subclasses to neutralize hardware states.
+			if (DEBUG) {
+			    System.out.println(getClass().getName() + " ended after crashing");
+			}
 		}
 		this.ending = true;
 	}
