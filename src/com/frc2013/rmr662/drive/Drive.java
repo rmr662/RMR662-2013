@@ -254,4 +254,13 @@ public class Drive extends Component {
 	    this.isPressed[i] = joysticks[RIGHT].getRawButton(i + 1);
 	}
     }
+
+	protected void onEnd() {
+		final Jaguar[] localMotors = motors;
+		final int length = localMotors.length;
+		
+		for (int i = 0; i < length; i++) {
+			localMotors[i].set(0.0);
+		}
+	}
 }

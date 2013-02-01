@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj.Jaguar;
 
 public class DanceMode extends RobotMode {
 	
+	/**
+	 * The drive component for DanceMode
+	 */
 	private static class DanceDrive extends Component {
 		private static final int MOTOR_CHANNEL_LEFT = 1;
 		private static final int MOTOR_CHANNEL_RIGHT = 2;
@@ -34,27 +37,30 @@ public class DanceMode extends RobotMode {
 		}
 	}
 	
-	private static class DanceManipulator extends Component {
-		private final Jaguar motor = new Jaguar(Climber.MOTOR_PORT);
-		private final DigitalInput top = new DigitalInput(Climber.SENSOR0);
-		private final DigitalInput bottom = new DigitalInput(Climber.SENSOR1);
-		
-		public DanceManipulator() {
-			motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
-		}
-		
-		protected void update() {
-			if (bottom.get() != Climber.INVERTEDS[0]) {
-				motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
-			} else if (top.get() != Climber.INVERTEDS[1]) {
-				motor.set(-.5 * Climber.MOTOR_DIRECTION_MULT);
-			}
-		}
-		
-		public void onEnd() {
-			motor.set(0);
-		}
-	}
+//	/**
+//	 * The manipulator component for DanceMode
+//	 */
+//	private static class DanceManipulator extends Component {
+//		private final Jaguar motor = new Jaguar(Climber.MOTOR_PORT);
+//		private final DigitalInput top = new DigitalInput(Climber.SENSOR0);
+//		private final DigitalInput bottom = new DigitalInput(Climber.SENSOR1);
+//		
+//		protected void onBegin() {
+//			motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
+//		}
+//		
+//		protected void update() {
+//			if (bottom.get() != INVERTED_BOTTOM) {
+//				motor.set(.5 * Climber.MOTOR_DIRECTION_MULT);
+//			} else if (top.get() != INVERTED_TOP) {
+//				motor.set(-.5 * Climber.MOTOR_DIRECTION_MULT);
+//			}
+//		}
+//		
+//		public void onEnd() {
+//			motor.set(0);
+//		}
+//	}
 	
 	private final DanceDrive drive;
 	
