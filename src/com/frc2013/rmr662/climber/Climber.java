@@ -12,6 +12,7 @@ import com.frc2013.rmr662.wrappers.RMRSolenoid;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // TODO: fill in returnAxisVal()
 // TODO: abort in the checkEmergency and emergencyControl methods, should be able to abort in auto directly
@@ -26,285 +27,75 @@ public class Climber extends Component {
 	}
 	
 	// Constants
-	public static final int PISTON_PORT = 1;
-	public static final boolean INVERTED_PISTON = false; // if hardware is inverted
-
-// port numbers
-// need actual digital ports from wiring	
-	public static final int SENSOR0 = 1;
-	public static final int SENSOR1 = 2;
-	public static final int SENSOR2 = 3;
-	public static final int SENSOR3 = 4;
-	public static final int SENSOR4 = 5;
-	public static final int SENSOR5 = 6;
 	public static final int MOTOR_PORT = 3;
-// carriage motor 
-// change to negative if inverted	
 	public static final int MOTOR_DIRECTION_MULT = 1;
-// figure out buttons	
-	public static final int JOYSTICK_BUTTON_INDEX_START_AUTO = 1;
-	public static final int JOYSTICK_BUTTON_INDEX_START_MAN = 2;
-	public static final int JOYSTICK_BUTTON_DOWN_AND_UP = 3;
-	public static final int JOYSTICK_PORT = TeleopMode.XBOX_JOYSTICK_PORT;
-// ports for the servos
-// get from wiring
-	public static final int SERVO0 = 1;
-	public static final int SERVO1 = 2;
-	public static final int SERVO2 = 3;
-	public static final int SERVO3 = 4;
-// figure out what values stop the hook, and what values allow the hook to move	
+	public static final int PISTON_PORT = 1;
+	public static final int SERVO_PORT = 0;
+	
 	public static final double SERVO_UNLOCK = 0.0;
 	public static final double SERVO_LOCK = 1.0;
 	
+	public static final int SENSOR_LIMIT_BOTTOM = 0;
+	public static final int SENSOR_LIMIT_TOP = 1;
+	public static final int SENSOR_FIXED_LEFT = 2;
+	public static final int SENSOR_FIXED_RIGHT = 3;
+	public static final int SENSOR_CARRIAGE_LEFT = 4;
+	public static final int SENSOR_CARRIAGE_RIGHT = 5;
+	
 	// Fields
-	private RMRSolenoid piston;
-	private Jaguar motor;
-	private RMRDigitalInput[] sensors = new RMRDigitalInput[6];
-	private Joystick joystick;
-	private Servo[] servos = new Servo[4];
-	// code that starts climb is in the update() method
-	// update method is called many times
-	// 
-	private boolean isFired;
+	private final Joystick controller;
+	private final RMRSolenoid piston;
+	private final Jaguar motor;
+	private final Servo servo;
 	
-	public static final int BOTTOM_LIMIT = 0;
-	public static final int TOP_LIMIT = 1;
-	public static final int MIDDLE_STATIONARY = 2;
-	public static final int TOP_STATIONARY = 3;
-	public static final int BOTTOM_CARRIAGE = 4;
-	public static final int TOP_CARRIAGE = 5;
+	private final RMRDigitalInput topLimit;
+	private final RMRDigitalInput bottomLimit;
+	private final RMRDigitalInput leftFixed;
+	private final RMRDigitalInput rightFixed;
+	private final RMRDigitalInput leftCarriage;
+	private final RMRDigitalInput rightCarriage;
 	
-	// sensors[0] is bottom limit
-	// sensors[1] is top limit
-	// sensors[2] is stationary middle hook
-	// sensors[3] is stationary top hook
-	// sensors[4] is bottom carriage hook
-	// sensors[5] is top carriage hook
 	public Climber() {
 		// initialize member variables
 		final HardwarePool pool = HardwarePool.getInstance();
-		piston = pool.getSolenoid(PISTON_PORT, INVERTED_PISTON);
-		sensors[0] = pool.getDigitalInput(SENSOR0, false);
-		sensors[1] = pool.getDigitalInput(SENSOR1, false);
-		sensors[2] = pool.getDigitalInput(SENSOR2, false);
-		sensors[3] = pool.getDigitalInput(SENSOR3, false);
-		sensors[4] = pool.getDigitalInput(SENSOR4, false);
-		sensors[5] = pool.getDigitalInput(SENSOR5, false);
+		piston = pool.getSolenoid(PISTON_PORT, false);
 		motor = pool.getJaguar(MOTOR_PORT);
-
-		servos[0] = pool.getServo(SERVO0);
-		servos[1] = pool.getServo(SERVO1);
-		servos[2] = pool.getServo(SERVO2);
-		servos[3] = pool.getServo(SERVO3);
-		// servos[0] is the servo for the stationary middle hook
-		// servos[1] is the servo for the stationary top hook
-		// servos[2] is the servo for the carriage bottom hook
-		// servos[3] is the servo for the carriage top hook
+		servo = pool.getServo(SERVO_PORT);
 		
-		joystick = new Joystick(JOYSTICK_PORT);
-		isFired = false;
-	}
-	
-	/**
-	 * If the emergency button is pressed, stops the motor and throws an
-	 * EmergencyException.
-	 * 
-	 * @throws EmergencyException
-	 */
-	private void checkEmergencyButton() throws EmergencyException {
-		if (joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_MAN)) {
-			motor.set(0.0);
-			throw new EmergencyException();
-		}
-	}
-	// returns 
-	private boolean getSensor(int number) {
-		return sensors[number].get();
-		// THIS CODE IS DEPRECATED!
-		// if (number == 0) {
-		// return sensors[2].get() != INVERTEDS[2];
-		// } else if (number == 1) {
-		// return sensors[1].get() != INVERTEDS[1] && sensors[2].get() ==
-		// INVERTEDS[2];
-		// } else if (number == 2) {
-		// return sensors[1].get() != INVERTEDS[1] && sensors[2].get() !=
-		// INVERTEDS[2];
-		// } else if (number == 3) {
-		// return sensors[0].get() != INVERTEDS[0] && sensors[1].get() ==
-		// INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
-		// } else if (number == 4) {
-		// return sensors[0].get() != INVERTEDS[0] && sensors[1].get() ==
-		// INVERTEDS[1] && sensors[2].get() != INVERTEDS[2];
-		// } else {
-		// return sensors[0].get() != INVERTEDS[0] && sensors[1].get() !=
-		// INVERTEDS[1] && sensors[2].get() == INVERTEDS[2];
-		// }
-	}
-	// check 
-	private boolean notOutOfBounds() { // TODO: remove this, optimize for direction of travel
-		return (!getSensor(BOTTOM_LIMIT) && !getSensor(TOP_LIMIT));
-	}
-	
-	// whatever we decide to use for emergency control (triggers or stick things
-	// or d pad) return value from -1 to 1
-	private double returnAxisVal() {
-		return 0.0; // TODO: return something relevant to emergency control
+		topLimit = pool.getDigitalInput(SENSOR_LIMIT_TOP, false);
+		bottomLimit = pool.getDigitalInput(SENSOR_LIMIT_BOTTOM, false);
+		leftFixed = pool.getDigitalInput(SENSOR_FIXED_LEFT, false);
+		rightFixed = pool.getDigitalInput(SENSOR_FIXED_RIGHT, false);
+		leftCarriage = pool.getDigitalInput(SENSOR_CARRIAGE_LEFT, false);
+		rightCarriage = pool.getDigitalInput(SENSOR_CARRIAGE_RIGHT, false);
+		
+		controller = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
 	}
 	
 	private void emergencyControl() {
 		// allows for operator to move the carriage up and down *slowly*
-		boolean servoOn0 = false;
-		boolean servoOn1 = false;
-		boolean servoOn2 = false;
-		boolean servoOn3 = false;
 		while (!isEnding()) {
-			final double speed = returnAxisVal() * .25 * MOTOR_DIRECTION_MULT;
-//			if ((speed == 0 && !sensor(0) && !sensor(1)) || (speed > 0 && !sensor(1))
-//					|| (speed < 0 && !sensor(0))) {
-//				motor.set(speed);
-//			}
-			// do not allow the carriage to go past limit switches
-
-			if ((speed > 0 && !getSensor(TOP_LIMIT))
-					|| (speed < 0 && !getSensor(BOTTOM_LIMIT))) {
-				motor.set(speed);
-			}
-			// use servos to lock in the hook
-			if (getSensor(MIDDLE_STATIONARY)) {
-				servos[0].set(SERVO_LOCK);
-				servoOn0 = true;		
-			}
-			else if (servoOn0) {
-				servos[0].set(SERVO_UNLOCK);
-				servoOn0 = false;
-			}
 			
-			if (getSensor(TOP_STATIONARY)) {
-				servos[1].set(SERVO_LOCK);
-				servoOn1 = true;
-			}
-			
-			else if (servoOn1) {
-				servos[1].set(SERVO_UNLOCK);
-				servoOn1 = false;
-			}
-			
-			if (getSensor(BOTTOM_CARRIAGE)) {
-				servos[2].set(SERVO_LOCK);
-				servoOn2 = true;
-			}
-			else if (servoOn2) {
-				servos[2].set(SERVO_UNLOCK);
-				servoOn2 = false;
-			}
-			
-			if (getSensor(TOP_CARRIAGE)) {
-				servos[3].set(SERVO_LOCK);
-				servoOn3 = true;
-			}
-			else if (servoOn3) {
-				servos[3].set(SERVO_UNLOCK);
-				servoOn3 = false;
-			}
 		}
 	}
 	
-	private void moveUpALevel() throws EmergencyException {
-		// moveUpAlevel can be used two times to move up the first two levels.
-		// while top stationary is hooked but top carriage is not, move carriage
-		// up
-		servos[1].set(SERVO_LOCK); // lock in the top stationary hooks
-		motor.set(0.5 * MOTOR_DIRECTION_MULT);
-		while (getSensor(TOP_STATIONARY) && !getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
-			checkEmergencyButton();
-		}
-		servos[3].set(SERVO_LOCK); // lock in the top carriage hooks
-		servos[1].set(SERVO_UNLOCK); // free the top stationary hooks
-		motor.set(0); 
-		// TODO: is it necessary stop the motors before going the other direction?
-		// while middle stationary is not hooked but top carriage is hooked,
-		// move carriage down, robot up
-		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
+	private void moveUpALevel() {
 		
-		while (!getSensor(MIDDLE_STATIONARY) && getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
-			checkEmergencyButton(); //TODO: sleep about 50 ms in every one of these
-//			Thread.sleep(50);
-		}
-		servos[0].set(SERVO_LOCK); // lock in the bottom stationary hooks
-		servos[3].set(SERVO_UNLOCK); // free the top carriage hooks
-		motor.set(0);
-		// while middle stationary is hooked but bottom carriage is not, move
-		// carriage up
-		motor.set(0.5 * MOTOR_DIRECTION_MULT);
-		while (getSensor(MIDDLE_STATIONARY) && !getSensor(BOTTOM_CARRIAGE) && notOutOfBounds()) {
-			checkEmergencyButton();
-		}
-		servos[2].set(SERVO_LOCK); // lock in the bottom carriage hooks
-		servos[0].set(SERVO_UNLOCK); // free the bottom stationary hooks
-		motor.set(0);
-		// while top stationary is not hooked but bottom carriage is hooked, move
-		// carriage down, robot up
-		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
-		while (!getSensor(TOP_STATIONARY) && getSensor(BOTTOM_CARRIAGE) && notOutOfBounds()) {
-			checkEmergencyButton();
-		}
-		servos[1].set(SERVO_LOCK); // lock in the top stationary hooks
-		servos[2].set(SERVO_UNLOCK); // free the bottom carriage hooks
-		motor.set(0);
 	}
 	
-	private void autoClimb() throws EmergencyException {
-		// tilt robot into position
-		piston.set(true);
-		// wait until the top hook is locked in
-		while (!getSensor(TOP_STATIONARY)) {
-			// (do nothing)
-		}
-		//piston.set(false); // TODO: is it necessary to retract piston?
-		moveUpALevel();
-		// TODO: something here?
-		moveUpALevel();
+	private void autoClimb() {
 		
-		// code to prevent robot touching second rung
-		// while top stationary is hooked but top carriage is not, move carriage
-		// up
-		motor.set(0.5 * MOTOR_DIRECTION_MULT);
-		while (getSensor(TOP_STATIONARY) && !getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
-			checkEmergencyButton();
-		}
-		motor.set(0);
-		// while middle stationary is not hooked but top carriage is hooked,
-		// move carriage down, robot up
-		motor.set(-0.5 * MOTOR_DIRECTION_MULT);
-		while (!getSensor(MIDDLE_STATIONARY) && getSensor(TOP_CARRIAGE) && notOutOfBounds()) {
-			checkEmergencyButton();
-		}
-		motor.set(0);
 	}
-	
 	
 	protected void update() {
-		if (!isFired && joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_AUTO)) {
-			// make it so that this code will not execute again
-			isFired = true;
-			try {
-				autoClimb();
-			} catch (EmergencyException e) {
-				emergencyControl();
-			}
-			
-			// ends thread
-			end();
-		}
-		else if (!isFired && joystick.getRawButton(JOYSTICK_BUTTON_INDEX_START_MAN)) {
-			piston.set(true);
-			emergencyControl();
-			isFired = true;
-		}
-		// in case we think of something to do after the robot has started climbing
-		//else {
-			
-		//}
+	    updateHookStatusIndicators();
+	}
+	
+	private void updateHookStatusIndicators() {
+	    SmartDashboard.putBoolean("hook_fixed_right", rightFixed.get());
+	    SmartDashboard.putBoolean("hook_fixed_left", leftFixed.get());
+	    SmartDashboard.putBoolean("hook_carriage_right", rightCarriage.get());
+	    SmartDashboard.putBoolean("hook_carriage_left", leftCarriage.get());
 	}
 
 	/**
@@ -313,11 +104,6 @@ public class Climber extends Component {
 	 */
 	protected void onEnd() {
 		motor.set(0.0);
-		final Servo[] servos = this.servos;
-		final int length = servos.length;
-		
-		for (int i = 0; i < length; i++) {
-			servos[i].set(SERVO_LOCK);
-		}
+//		servo.set(SERVO_LOCK); May break something if hooks are folded in (passing a bar)
 	}
 }

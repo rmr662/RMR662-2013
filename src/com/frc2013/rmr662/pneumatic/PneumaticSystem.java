@@ -18,7 +18,7 @@ public class PneumaticSystem extends Component {
     public static final int PRESSURE_SWITCH_CHANNEL = 5;
     public static final int RELAY_CHANNEL = 1;
     
-    private Compressor compressor;
+    private final Compressor compressor;
     private boolean isRunning = false;
     
     public PneumaticSystem() {
