@@ -2,11 +2,11 @@ package com.frc2013.rmr662.system;
 
 import com.frc2013.rmr662.wrappers.Invertable;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
+import com.frc2013.rmr662.wrappers.RMRJaguar;
 import com.frc2013.rmr662.wrappers.RMRSolenoid;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Encoder;
 
-import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Servo;
 
 /**
@@ -32,22 +32,34 @@ public class HardwarePool {
     private HardwarePool() {
 	hardwares = new Object[INITIAL_POOL_SIZE];
     }
-
+    
     /**
      * Gets a Jaguar on the given channel
      *
      * @param channel
      * @return
      */
-    public synchronized Jaguar getJaguar(int channel) {
-	Jaguar o = (Jaguar) getObject(channel,
-		Jaguar.class);
+    public synchronized RMRJaguar getJaguar(int channel) {
+	return getJaguar(channel, 1.0);
+    }
+
+    /**
+     * Gets a Jaguar on the given channel
+     *
+     * @param channel
+     * @param multiplier The multiplier to apply to speed input
+     * @return
+     */
+    public synchronized RMRJaguar getJaguar(int channel, double multiplier) {
+	RMRJaguar o = (RMRJaguar) getObject(channel,
+		RMRJaguar.class);
 
 	if (o == null) { // Need to create a new Jaguar
 
-	    o = new Jaguar(channel);
+	    o = new RMRJaguar(channel, multiplier);
 	    hardwares[channel] = o;
-
+	} else if (((RMRJaguar) o).multiplier != multiplier) {
+	    System.err.println("The Jaguar already initialized on " + channel + " does not have the same multiplier.");
 	}
 	return o;
     }
