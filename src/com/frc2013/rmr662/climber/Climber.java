@@ -1,31 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.frc2013.rmr662.climber;
 import com.frc2013.rmr662.main.TeleopMode;
 import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
-import com.frc2013.rmr662.wrappers.RMRSolenoid;
-
-import edu.wpi.first.wpilibj.Jaguar;
+import com.frc2013.rmr662.wrappers.RMRJaguar;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-// TODO: fill in returnAxisVal()
-// TODO: abort in the checkEmergency and emergencyControl methods, should be able to abort in auto directly
-// TODO: refactor so that numbers are constants for names
-// TODO: refactor so that sensor() method is getSensor() in all places
-// TODO: replace notoutofbounds with limitswitch checking, to be specific to each case, up or down
 public class Climber extends Component {
-	
-	private static class EmergencyException extends Exception {
-		private static final long serialVersionUID = -7491961259340232519L;
-		// ^ This is just here to make Eclipse happy.
-	}
-	
 	// Constants
 	public static final int MOTOR_PORT = 3;
 	public static final int MOTOR_DIRECTION_MULT = 1;
@@ -42,12 +25,21 @@ public class Climber extends Component {
 	public static final int SENSOR_CARRIAGE_LEFT = 4;
 	public static final int SENSOR_CARRIAGE_RIGHT = 5;
 	
+	// TODO: fill out moveUpALevel
+	
+	// abort button
+	public static final int ABORT_BUTTON = 1;
+	// operator button
+	public static final int OPERATOR_BUTTON = 2;
+	// auto button
+	public static final int AUTO_BUTTON = 3;
+	
 	// Fields
-	private final Joystick controller;
-	private final RMRSolenoid piston;
-	private final Jaguar motor;
+	private final Joystick joystick;
+	private final RMRJaguar motor;
 	private final Servo servo;
 	
+	// sensors
 	private final RMRDigitalInput topLimit;
 	private final RMRDigitalInput bottomLimit;
 	private final RMRDigitalInput leftFixed;
@@ -55,10 +47,18 @@ public class Climber extends Component {
 	private final RMRDigitalInput leftCarriage;
 	private final RMRDigitalInput rightCarriage;
 	
+	// if true, choose auto mode, if false, choose operator
+	private boolean startAuto = true;
+	// for largest case statement (in update() )
+	private int mode;
+	// for the automode cases
+	private int autoMode;
+	// for the case statements involved in moving up during automode
+	private int moveUpALevelMode;
+	
 	public Climber() {
 		// initialize member variables
 		final HardwarePool pool = HardwarePool.getInstance();
-		piston = pool.getSolenoid(PISTON_PORT, false);
 		motor = pool.getJaguar(MOTOR_PORT);
 		servo = pool.getServo(SERVO_PORT);
 		
@@ -69,41 +69,142 @@ public class Climber extends Component {
 		leftCarriage = pool.getDigitalInput(SENSOR_CARRIAGE_LEFT, false);
 		rightCarriage = pool.getDigitalInput(SENSOR_CARRIAGE_RIGHT, false);
 		
-		controller = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
-	}
-	
-	private void emergencyControl() {
-		// allows for operator to move the carriage up and down *slowly*
-		while (!isEnding()) {
-			
-		}
-	}
-	
-	private void moveUpALevel() {
+		joystick = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
 		
+		mode = 0;
+		autoMode = 0;
+		moveUpALevelMode = 0;
 	}
 	
-	private void autoClimb() {
-		
-	}
-	
-	protected void update() {
-	    updateHookStatusIndicators();
-	}
-	
+	// Sends hook states to SmartDashboard
 	private void updateHookStatusIndicators() {
 	    SmartDashboard.putBoolean("hook_fixed_right", rightFixed.get());
 	    SmartDashboard.putBoolean("hook_fixed_left", leftFixed.get());
 	    SmartDashboard.putBoolean("hook_carriage_right", rightCarriage.get());
 	    SmartDashboard.putBoolean("hook_carriage_left", leftCarriage.get());
 	}
-
+	
+	// return button press information, accounts for possible inversion
+	private boolean startAutoButtonPressed() {
+		return joystick.getRawButton(AUTO_BUTTON);
+	}
+	
+	// return button press infoprmation to start operator mode, accounts for inversion
+	private boolean startOperatorButtonPressed() {
+		return joystick.getRawButton(OPERATOR_BUTTON);
+	}
+	
+	//returns true if abort button is pressed
+	private boolean abortPressed() {
+		return joystick.getRawButton(ABORT_BUTTON);
+	}
+	
+	// return the joystick value
+	private double getJoystickAxis() {
+		return joystick.getRawAxis(3);
+	}
+	
+	// when this method is done with its stuff it should increment autoMode
+	private void moveUpALevel() {
+		// moveUpAlevel can be used two times to move up the first two levels.
+	}
+	private void auto() {
+		switch (autoMode) {
+			// move up first level, resulting in top stationary on the second bar
+			case 0:
+				moveUpALevel();
+				break;
+			// allow it to move up a level again	
+			case 1:
+				moveUpALevelMode = 0;
+				autoMode++;
+				break;
+			// move up second level, resulting in top stationary on the third bar 
+			case 2:
+				moveUpALevel();
+				break;
+			// make it not touch the second bar
+			case 3:
+				break;
+			// if something unexpected happens, abort
+			default:
+				end();
+				break;
+		}
+	}
+	private void operator() {
+		// need to add things for auto top servo locking
+		// give joystick control *slowly*
+		motor.set(getJoystickAxis() * .5);
+	}
+	
+	protected void update() {
+		updateHookStatusIndicators();
+		switch (mode) {
+			
+			case 0: // pre-climb
+				if (startAutoButtonPressed()) {
+					// make it so that it will continue to auto later
+					SmartDashboard.putString("climb_mode", "auto");
+					startAuto = true;
+				}
+				if (startOperatorButtonPressed()) {
+					// make it so that it will continue to operator later
+					SmartDashboard.putString("climb_mode", "operator");
+					startAuto = false;
+				}
+				// once the top stationary latches in change the mode to auto or operator
+				if (leftFixed.get() && rightFixed.get()) {
+					// auto
+					if (startAuto) {
+						mode = 1;
+					}
+					// operator
+					else {
+						mode = 2;
+					}
+				}
+				break;
+			
+			case 1: // auto
+				// abort hasn't been pressed
+				if (startOperatorButtonPressed()) {
+					// change to operator
+					mode = 2;
+				}
+				if (! abortPressed()) {
+					auto();
+				}
+				else {
+					// go to default case, which aborts
+					motor.set(0.0);
+					mode = 3;
+				}
+				break;
+			
+			case 2: // operator
+				// abort hasn't been pressed
+				if (! abortPressed()) {
+					operator();
+				}
+				else {
+					// go to default case
+					motor.set(0.0);
+					mode = 3;
+				}
+				break;
+			
+			default: // abort
+				end();
+				break;
+		}
+	}
+		
 	/**
-	 * Neutralize all hardware states here. (i.e. stop motor, reset solenoids, etc.)
+	 * Neutralize all dangerous hardware states here.
 	 * @author Dan
 	 */
-	protected void onEnd() {
+	public void onEnd() {
 		motor.set(0.0);
-//		servo.set(SERVO_LOCK); May break something if hooks are folded in (passing a bar)
 	}
 }
