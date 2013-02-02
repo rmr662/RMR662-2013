@@ -77,11 +77,16 @@ public class Climber extends Component {
 	}
 	
 	// Sends hook states to SmartDashboard
-	private void updateHookStatusIndicators() {
+	private void sendHookStatus() {
 	    SmartDashboard.putBoolean("hook_fixed_right", rightFixed.get());
 	    SmartDashboard.putBoolean("hook_fixed_left", leftFixed.get());
 	    SmartDashboard.putBoolean("hook_carriage_right", rightCarriage.get());
 	    SmartDashboard.putBoolean("hook_carriage_left", leftCarriage.get());
+	}
+	
+	private void setAuto(boolean auto) {
+		startAuto = auto;
+		SmartDashboard.putBoolean("climb_mode", auto);
 	}
 	
 	// return button press information, accounts for possible inversion
@@ -108,6 +113,7 @@ public class Climber extends Component {
 	private void moveUpALevel() {
 		// moveUpAlevel can be used two times to move up the first two levels.
 	}
+	
 	private void auto() {
 		switch (autoMode) {
 			// move up first level, resulting in top stationary on the second bar
@@ -139,19 +145,17 @@ public class Climber extends Component {
 	}
 	
 	protected void update() {
-		updateHookStatusIndicators();
+		sendHookStatus();
 		switch (mode) {
 			
 			case 0: // pre-climb
 				if (startAutoButtonPressed()) {
 					// make it so that it will continue to auto later
-					SmartDashboard.putString("climb_mode", "auto");
-					startAuto = true;
+					setAuto(true);
 				}
 				if (startOperatorButtonPressed()) {
 					// make it so that it will continue to operator later
-					SmartDashboard.putString("climb_mode", "operator");
-					startAuto = false;
+					setAuto(false);
 				}
 				// once the top stationary latches in change the mode to auto or operator
 				if (leftFixed.get() && rightFixed.get()) {
