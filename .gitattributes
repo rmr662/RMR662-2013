@@ -1,3 +1,6 @@
+# Convert spaces to tabs
+*.java core.whitespace="indent-with-non-tab,tabwidth=4"
+
 # Auto detect text files and perform LF normalization
 * text=auto
 
