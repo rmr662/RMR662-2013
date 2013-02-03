@@ -103,14 +103,8 @@ public class HardwarePool {
 
 	if (o == null) { // Need to create a new Compressor
 	    
-	    if (hardwares[channelB] != null) {
-		throw new IllegalStateException("A hardware component already exists on channelB (" + channelB + ")");
-	    }
-	    
 	    o = new Compressor(channelA, channelB);
 	    hardwares[channelA] = o;
-	    hardwares[channelB] = o;
-	    
 	}
 	return o;
     }

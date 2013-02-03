@@ -7,6 +7,7 @@ package com.frc2013.rmr662.pneumatic;
 import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  *
@@ -19,24 +20,30 @@ public class PneumaticSystem extends Component {
     public static final int RELAY_CHANNEL = 1;
     
     private final Compressor compressor;
+    private final DigitalInput disableSwitch;
     private boolean isRunning = false;
     
     public PneumaticSystem() {
         super();
         compressor = HardwarePool.getInstance().getCompressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
+        disableSwitch = HardwarePool.getInstance().getDigitalInput(6, false);
     }
     
     protected void onBegin() {
-        compressor.start();
-        isRunning = true;
+        
     }
     
     protected void onEnd() {
-        compressor.stop();
-        isRunning = false;
+        
     }
     
     protected void update() {
-        // TODO check the compressor disable switch.
+        System.out.println("Compressor Update");
+        if (disableSwitch.get() && compressor.enabled()) {
+            compressor.stop();
+        }
+        if (!(disableSwitch.get() || compressor.enabled())) {
+            compressor.start();
+        }
     }
 }
