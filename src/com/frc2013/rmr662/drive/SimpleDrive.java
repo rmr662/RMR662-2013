@@ -24,25 +24,11 @@ public class SimpleDrive extends Component {
     }
     
     public synchronized void update() {
-        final double leftAxis = xbox.getRawAxis(2);
-        final double rightAxis = xbox.getRawAxis(4);
-//	System.out.println("x = " + leftAxis + " y = " + rightAxis);
-	arcadeDrive(leftAxis, rightAxis);
-    }
-    
-    /**
-     * Drives the robot arcade-style by calculating from two axes
-     * 
-     * @param xAxis The x-axis to use
-     * @param yAxis The y-axis to use
-     */
-    private void arcadeDrive(double yAxis, double xAxis) {
-        double leftSpeed, rightSpeed;
-        leftSpeed = (yAxis + xAxis) / 3;
-        rightSpeed = (yAxis - xAxis) / 3;
+        final double yAxis = xbox.getRawAxis(2);
+        final double xAxis = xbox.getRawAxis(4);
         
-        left.set(leftSpeed);
-        right.set(rightSpeed);
+	left.set(-(yAxis + xAxis) / 3);
+        right.set(-(yAxis - xAxis) / 3);
     }
     
     protected void onEnd() {
