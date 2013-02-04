@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Climber extends Component {
 	// Constants
-	public static final int MOTOR_PORT = 3;
+    public static final int MOTOR_PORT = 3;
 	public static final int MOTOR_DIRECTION_MULT = 1;
 	public static final int PISTON_PORT = 1;
 	public static final int SERVO_PORT = 0;
