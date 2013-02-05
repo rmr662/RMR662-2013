@@ -26,7 +26,7 @@ public class PneumaticSystem extends Component {
     public PneumaticSystem() {
         super();
         compressor = HardwarePool.getInstance().getCompressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
-        disableSwitch = HardwarePool.getInstance().getDigitalInput(6, false);
+        disableSwitch = HardwarePool.getInstance().getDigitalInput(6, true);
     }
     
     protected void onBegin() {
