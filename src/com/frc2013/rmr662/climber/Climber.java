@@ -10,15 +10,37 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Climber extends Component {
 	// Constants
-	// TODO: constant for time value waiting
+	
+	// different modes in auto()
+	public static final int MOVE_UP_FIRST_BAR = 0;
+	public static final int MOVE_UP_SECOND_BAR = 1;
+	public static final int HANG_ON_THIRD_BAR = 2;
+	public static final int END_OF_AUTO = 3;
+	
+	// we should be concerned if only one, and not both, of a set of hooks is still gripping a bar after this amount of time has passed
+	public static final int TIME_AT_WHICH_WE_SHOULD_BE_CONCERNED = 100;
+	
+	public static final double CARRIAGE_SPEED_FAST = 0.5;
+	public static final double CARRIAGE_SPEED_SLOW = 0.25;
+	
+	// different modes in update()
+	public static final int PRE_CLIMB = 0;
+	public static final int AUTO_MODE = 1;
+	public static final int OPERATOR_MODE = 2;
+	
+	// ports for the different hardware stuff -- get these numbers from wiring 
 	public static final int MOTOR_PORT = 3;
-	public static final int MOTOR_DIRECTION_MULT = 1;
 	public static final int PISTON_PORT = 1;
 	public static final int SERVO_PORT = 0;
 	
+	// will be -1 if motors are inverted -- positive should move carriage up, negative should move carriage down
+	public static final int MOTOR_DIRECTION_MULT = 1;
+	
+	// double values for the servo to unlock and lock the top carriage hooks
 	public static final double SERVO_UNLOCK = 0.0;
 	public static final double SERVO_LOCK = 1.0;
 	
+	// different sensor ports -- get these numbers from wiring
 	public static final int SENSOR_LIMIT_BOTTOM = 0;
 	public static final int SENSOR_LIMIT_TOP = 1;
 	// not ored with others, since the bottom has no sensors
@@ -27,8 +49,6 @@ public class Climber extends Component {
 	// ored together
 	public static final int SENSOR_CARRIAGE_LEFT = 4;
 	public static final int SENSOR_CARRIAGE_RIGHT = 5;
-	
-	// TODO: fill out moveUpALevel
 	// add to the automode case 3 for the final movements
 	
 	// abort button
@@ -55,7 +75,7 @@ public class Climber extends Component {
 	private final RMRDigitalInput rightCarriage;
 	
 	// if true, choose auto mode, if false, choose operator
-	private boolean startAuto = true; // TODO: change to false?
+	private boolean startAuto = true; // assuming we default want to do auto
 	// for largest case statement (in update() )
 	private int mode;
 	// for the automode cases
@@ -127,15 +147,16 @@ public class Climber extends Component {
 	private double getJoystickAxis() {
 		return joystick.getRawAxis(3); // Constant
 	}
-	
+
+//servo locking maually stuff == bad	
 	// servo button pressed
-	private boolean servoPressed() {
-		return joystick.getRawButton(SERVO_BUTTON);
-	}
-	// servo stop button pressed
-	private boolean servoNotPressed() {
-		return joystick.getRawButton(NOT_SERVO_BUTTON);
-	}
+//	private boolean servoPressed() {
+//		return joystick.getRawButton(SERVO_BUTTON);
+//	}
+//	// servo stop button pressed
+//	private boolean servoNotPressed() {
+//		return joystick.getRawButton(NOT_SERVO_BUTTON);
+//	}
 	
 	// Returns true if at least one carriage hook is pressed
 	private boolean oneCarriagePressed() {
@@ -176,12 +197,10 @@ public class Climber extends Component {
 
 	// ...
 	private void moveUpALevel() {
-		// 0 is ok the real value is in an if statement that will always execute
 
 		switch (moveUpALevelMode) {
-			// TODO increment automode at the final case
 			case 0: // moves the carriage all the way up
-				motor.set(0.5); // TODO: make constant
+				motor.set(CARRIAGE_SPEED_FAST);
 				if (topLimit.get()) {
 					motor.set(0.0);
 					servo.set(SERVO_LOCK); // lock the top carriage hooks
@@ -189,47 +208,53 @@ public class Climber extends Component {
 				}
 				break;
 			case 1: // moves the carriage down until a top carriage hook grips to the bar 
-				motor.set(-0.25);
+				motor.set(-CARRIAGE_SPEED_SLOW);
 				if (oneCarriagePressed()) {
 					t0 = System.currentTimeMillis(); // get system time
 					moveUpALevelMode = 2;
-				} // TODO: else if bottom limit ... for similar cases
+				} else if (bottomLimit.get()) {
+					motor.set(0.0);
+				}
 				break;
 			case 2:
-				// just in case both hooks do not grip to bar after 100 ms, move carriage back up and retry
+				// just in case both middle stationary hooks do not grip to bar after 100ms, 
+				// go into operator mode because something is not right
 				if (bothCarriagePressed()) {
 					moveUpALevelMode = 3;
-				} else if (System.currentTimeMillis() - t0 > 100) {
-					motor.set(0.0); // TODO: go to operator control? (for all similar cases: 2, 5, 9)
-					moveUpALevelMode = 0;
+				} else if (System.currentTimeMillis() - t0 > TIME_AT_WHICH_WE_SHOULD_BE_CONCERNED) {
+					motor.set(0.0); 
+					mode = OPERATOR_MODE;
 				}
 				break;
 			case 3: // move carriage all the way down, moving robot up
-				motor.set(-0.5);
+				motor.set(-CARRIAGE_SPEED_FAST);
 				if (bottomLimit.get()) {
 					motor.set(0.0);
 					moveUpALevelMode = 4;
 				}
 				break;
 			case 4: // move carriage up, moving robot down, until a middle stationary hook grips to bar
-				motor.set(0.25);
+				motor.set(CARRIAGE_SPEED_SLOW);
 				if (oneStationaryPressed()) {
 					t0 = System.currentTimeMillis();
 					moveUpALevelMode = 5;
+				} else if (topLimit.get()) {
+					motor.set(0.0);
 				}
 				break;
 			case 5:
-				// just in case both middle stationary hooks do not grip to bar after 100ms, move carriage back down and retry
+				// just in case both middle stationary hooks do not grip to bar after 100ms, 
+				// go into operator mode because something is not right
 				if (bothStationaryPressed()) {
 					moveUpALevelMode = 6;					
-				} else if (System.currentTimeMillis() - t0 > 100) {
+				} else if (System.currentTimeMillis() - t0 > TIME_AT_WHICH_WE_SHOULD_BE_CONCERNED) {
 					motor.set(0.0);
-					moveUpALevelMode = 3;
+					mode = OPERATOR_MODE;
 				}
 				break;
 			case 6: // move carriage all the way up
 				servo.set(SERVO_UNLOCK); // Move this to case 5 if block
-				motor.set(0.5);
+				motor.set(CARRIAGE_SPEED_FAST);
 				if (topLimit.get()) {
 					motor.set(0.0);
 					moveUpALevelMode = 7;
@@ -237,38 +262,42 @@ public class Climber extends Component {
 				break;
 			case 7: // move carriage down, causing bottom carriage hooks to grip to bar, moving the robot up
 				// THERE IS NOTHING TO MAKE SURE THE BOTTOM CARRIAGE HOOKS ARE PRESSED!
-				motor.set(-0.5);
+				motor.set(-CARRIAGE_SPEED_FAST);
 				if (bottomLimit.get()) {
 					motor.set(0.0);
 					moveUpALevelMode = 8;
 				}
 				break;
 			case 8: // move carriage up, moving robot down, until a top stationary hook grips to bar
-				motor.set(0.25);
+				motor.set(CARRIAGE_SPEED_SLOW);
 				if (oneStationaryPressed()) {
 					t0 = System.currentTimeMillis();
 					moveUpALevelMode = 9;
 				}
+				else if (topLimit.get()) {
+					motor.set(0.0);
+				}
 				break;
 			case 9:
-				// just in case both top stationary hooks do not grip to bar after 100ms, move carriage back down and retry
+				// just in case both middle stationary hooks do not grip to bar after 100ms, 
+				// go into operator mode because something is not right
 				if (bothStationaryPressed()) {
 					// Should advance autoMode!
+					moveUpALevelMode = 0;
+					autoMode++;
 					break;
-				} else if (System.currentTimeMillis() - t0 > 100) {
+				} else if (System.currentTimeMillis() - t0 > TIME_AT_WHICH_WE_SHOULD_BE_CONCERNED) {
 					motor.set(0.0);
-					moveUpALevelMode = 7;
+					mode = OPERATOR_MODE;
 				}
 				break;
 		}
 	}
 	private void hangOnThirdLevel() {
-		// 0 is ok, because the if statement that the real initializer is in will be evaluated no matter what
 		// intended to hang middle stationary on top bar (90 inch)
-		//TODO: same problem with operator mode (the timer stuff)
 		switch (moveUpALevelMode) {
 			case 0: // moves the carriage all the way up
-				motor.set(0.5);
+				motor.set(CARRIAGE_SPEED_FAST);
 				if (topLimit.get()) {
 					motor.set(0.0);
 					servo.set(SERVO_LOCK); // SERVO_LOCK the top carriage hooks
@@ -276,42 +305,52 @@ public class Climber extends Component {
 				}
 				break;
 			case 1: // moves the carriage down until a top carriage hook grips to the bar 
-				motor.set(-0.25);
+				motor.set(-CARRIAGE_SPEED_SLOW);
 				if (oneCarriagePressed()) {
 					t0 = System.currentTimeMillis(); // get system time
 					moveUpALevelMode = 2;
 				}
+				else if (bottomLimit.get()) {
+					motor.set(0.0);
+				}
 				break;
 			case 2:
-				// just in case both hooks do not grip to bar after 100 ms, move carriage back up and retry
+				// just in case both middle stationary hooks do not grip to bar after 100ms, 
+				// go into operator mode because something is not right
 				if (bothCarriagePressed()) {
 					moveUpALevelMode = 3;
-				} else if (System.currentTimeMillis() - t0 > 100) {
+				} else if (System.currentTimeMillis() - t0 > TIME_AT_WHICH_WE_SHOULD_BE_CONCERNED) {
 					motor.set(0.0);
-					moveUpALevelMode = 0;
+					mode = OPERATOR_MODE;
 				}
 				break;
 			case 3: // move carriage all the way down, moving robot up
-				motor.set(-0.5);
+				motor.set(-CARRIAGE_SPEED_FAST);
 				if (bottomLimit.get()) {
 					motor.set(0.0);
 					moveUpALevelMode = 4;
 				}
 				break;
 			case 4: // move carriage up, moving robot down, until a middle stationary hook grips to bar
-				motor.set(0.25);
+				motor.set(CARRIAGE_SPEED_SLOW);
 				if (oneStationaryPressed()) {
 					t0 = System.currentTimeMillis();
 					moveUpALevelMode = 5;
 				}
+				else if (topLimit.get()) {
+					motor.set(0.0);			
+				}
 				break;
 			case 5:
-				// just in case both middle stationary hooks do not grip to bar after 100ms, move carriage back down and retry
+				// just in case both middle stationary hooks do not grip to bar after 100ms, 
+				// go into operator mode because something is not right
 				if (bothStationaryPressed()) {
+					moveUpALevelMode = 0;
+					autoMode++;
 					break;
-				} else if (System.currentTimeMillis() - t0 > 100) {
+				} else if (System.currentTimeMillis() - t0 > TIME_AT_WHICH_WE_SHOULD_BE_CONCERNED) {
 					motor.set(0.0);
-					moveUpALevelMode = 3;
+					mode = OPERATOR_MODE;
 				}
 				break;
 		}
@@ -323,30 +362,20 @@ public class Climber extends Component {
 		
 		switch (autoMode) {
 			// move up first level, resulting in top stationary on the second bar
-			case 0:
+			case MOVE_UP_FIRST_BAR:
 				moveUpALevel();
 				break;
-				
-			// allow it to move up a level again	
-				// combine 1 and 2
-			case 1:
-				// put this in move up a level
-				moveUpALevelMode = 0;
-				autoMode++;
-				break;
-				
 			// move up second level, resulting in top stationary on the third bar 
-			case 2:
+			case MOVE_UP_SECOND_BAR:
 				moveUpALevel();
-				// needs to add one to auto mode, works with chnage from previous case
 				break;
 				
 			// make it not touch the second bar
-			case 3:
-				// increment automode in hangonthirdlevel
-				// add case 4 for only checking operator button
-				// dont add operator checking, already done in update method
+			case HANG_ON_THIRD_BAR:
 				hangOnThirdLevel();
+				break;
+			case END_OF_AUTO:
+				// checks for operator button in update
 				break;
 			// if something unexpected happens, abort
 			default:
@@ -355,18 +384,23 @@ public class Climber extends Component {
 		}
 	}
 	private void operator() {
-		// TODO: need to add things for auto top servo locking
-		// give joystick control *slowly*
-		//make sure that it is impossible to have a locked servo claw move up
-		// add limit switch checking
-		// give driver feedback
-		motor.set(getJoystickAxis() * .5);
-		if (servoPressed()) {
-			servo.set(SERVO_LOCK);
-		}
-		if (servoNotPressed()) {
+		// the point: give joystick control *slowly*
+		// TODO: give driver feedback // need Dan for this maybe
+		double speed = getJoystickAxis() * CARRIAGE_SPEED_SLOW;
+		if (!oneCarriagePressed() && ((speed / Math.abs(speed)) == 1)) {
+			// top carriage hook (if for some reason only one is on) or hooks are not on bar and carriage is moving up
 			servo.set(SERVO_UNLOCK);
 		}
+		else {
+			// top carriage hooks are on bar or carriage is moving down
+			servo.set(SERVO_LOCK);
+		}
+		// limit switch checking
+		if (bottomLimit.get() || topLimit.get()) {
+			motor.set(0.0);
+		}
+		motor.set(speed);
+
 	}
 	
 	protected void update() {
@@ -374,7 +408,7 @@ public class Climber extends Component {
 		// Only update status when changed.
 		
 		switch (mode) {
-			case 0: // pre-climb // Should be constant
+			case PRE_CLIMB: // before the climb starts
 				if (isAutoButtonPressed()) {
 					// make it so that it will continue to auto later
 					setAuto(true);
@@ -397,12 +431,12 @@ public class Climber extends Component {
 				}
 				break;
 			
-			case 1: // auto // Should be constant
+			case AUTO_MODE: // automatic climb
 				// abort hasn't been pressed
 				if (isOperatorButtonPressed()) {
 					// change to operator
 					mode = 2;
-					//break; add this here
+					break;
 				}
 				if (! isAbortPressed()) {
 					auto();
@@ -410,10 +444,11 @@ public class Climber extends Component {
 					// go to default case, which aborts
 					motor.set(0.0);
 					mode = 3;
+					break;
 				}
 				break;
 			
-			case 2: // operator // Should be constants
+			case OPERATOR_MODE: // manual climb
 				// abort hasn't been pressed
 				if (! isAbortPressed()) {
 					operator();
@@ -422,10 +457,14 @@ public class Climber extends Component {
 					// go to default case
 					motor.set(0.0);
 					mode = 3;
+					break;
 				}
 				break;
 			
 			case 3: // abort
+				motor.set(0.0);
+				end();
+				break;
 			default:
 				end();
 				break;
