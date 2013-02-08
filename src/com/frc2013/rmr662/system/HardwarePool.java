@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj.Servo;
  * A pool of hardware components (anything that uses IO channels). 
  */
 public class HardwarePool {
+    /** The channel number to use for unused breakouts */
+    private static final int UNUSED = -1;
+    
     // Singleton stuff
     private static HardwarePool instance;
 
@@ -23,14 +26,46 @@ public class HardwarePool {
 	return instance;
     }
     
+    private static class HardwareElement {
+	/** The 12C channel on the Digital Breakout */
+	final int _12C;
+	/** The PWM channel on the Digital Breakout */
+	final int pwm;
+	/** The Relay channel on the Digital Breakout */
+	final int relay;
+	/** The Digital I/O channel on the Digital Breakout */
+	final int digital;
+	
+	/** The channel on the Analog Breakout */
+	final int analog;
+	/** The channel on the Solenoid Breakout */
+	final int solenoid;
+	
+	HardwareElement(int digital, int pwm, int relay, int _12C, int analog, int solenoid) {
+	    this.digital = digital;
+	    this.pwm = pwm;
+	    this.relay = relay;
+	    this._12C = _12C;
+	    this.analog = analog;
+	    this.solenoid = solenoid;
+	}
+    }
+    
     // Constants
     private static final int INITIAL_POOL_SIZE = 12;
     
     // Fields
-    private Object[] hardwares;
-
+    private HardwareElement[] hardwares;
+    private HardwareElement lastObject;
+    
     private HardwarePool() {
-	hardwares = new Object[INITIAL_POOL_SIZE];
+	hardwares = new HardwareElement[INITIAL_POOL_SIZE];
+    }
+    
+    private boolean exists(Class c, int digital, int pwm, int relay, int _12C, int analog, int solenoid) {
+	for (int i = 0; i < hardwares.length; i++) {
+	    hardwares[i]
+	}
     }
     
     /**

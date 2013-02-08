@@ -17,8 +17,8 @@ public class Drive extends Component {
     private static final double[] KI = {0.0, 0.0};
     private static final double[] KD = {0.21, 0.21};
     private static final int[] MOTOR_CHANNELS = {1, 2};
-    private static final int[] ENCODER_CHANNELS_A = {3, 5};
-    private static final int[] ENCODER_CHANNELS_B = {4, 6};
+    private static final int[] ENCODER_CHANNELS_A = {1, 3};
+    private static final int[] ENCODER_CHANNELS_B = {2, 4};
     
     private static final double DISTANCE_PER_PULSE = 0.001198473;
     private static final double MAX_SPEED = 1;
@@ -33,6 +33,7 @@ public class Drive extends Component {
     
     
     private double[] targetValues = {0d , 0d};
+
     private double[] arcadeAxes = {0d , 0d};
     
     private boolean[] isPressed = {false, false, false, false, false, false};
@@ -49,7 +50,8 @@ public class Drive extends Component {
 	final HardwarePool pool = HardwarePool.getInstance();
 	for(int i = 0; i < MOTOR_CHANNELS.length; i++) {
 	    motors[i] = pool.getJaguar(MOTOR_CHANNELS[i]);
-	    encoders[i] = pool.getEncoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
+	    //encoders[i] = pool.getEncoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
+	    encoders[i] = new Encoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
 	    encoders[i].setDistancePerPulse(DISTANCE_PER_PULSE);
 	    encoders[i].setPIDSourceParameter(Encoder.PIDSourceParameter.kRate);
 	    controllers[i] = new PIDController(KP[i], KI[i], KD[i], encoders[i], motors[i]);
@@ -68,6 +70,9 @@ public class Drive extends Component {
     // @Override
     public synchronized void update() {
 	setAxisValues(joysticks);
+	
+	System.out.println("Y axis: " +  arcadeAxes[LEFT] + " X axis: " + arcadeAxes[RIGHT]);
+	
 	if (tuningEnabled) {
 	    relativePIDTuning(joysticks);
 	    //System.out.println(isPressed[0] + " " + isPressed[1] + " " + isPressed[2] + " " + isPressed[3]  + " " + isPressed[4] + " " + isPressed[5]);
@@ -115,6 +120,9 @@ public class Drive extends Component {
 		setTargetValues(yAxis-xAxis, -Math.max(-yAxis, -xAxis));
 	    }
 	}
+	
+	System.out.println("Left: " + targetValues[LEFT] + "Right: " + targetValues[RIGHT]);
+	
 	if (pidEnabled) {
 	    controllers[LEFT].setSetpoint(targetValues[LEFT]);
 	    controllers[RIGHT].setSetpoint(targetValues[RIGHT]);
@@ -135,6 +143,12 @@ public class Drive extends Component {
 	arcadeAxes[RIGHT] = joysticks[LEFT].getRawAxis(4);
     }
     
+    /**
+     * Forces a double to be no larger than 1 or smaller than -1.
+     * 
+     * @param num The double to limit
+     * @return The limited double
+     */
     private static double limit(double num) {
 	if (num < -1d) {
 	    return -1d;
@@ -217,6 +231,14 @@ public class Drive extends Component {
 	setPID(false);
     }
     
+    /**
+     * Sets P, I, and D values based on buttons pressed on the 2nd joystick.
+     * Trigger increments P, 'Button 2' decrements P
+     * 'Button 3' increments I, 'Button 4' decrements I
+     * 'Button 5' increments D, 'Button 6' decrements D
+     * 
+     * @param joysticks 
+     */
     private void relativePIDTuning(Joystick[] joysticks) {
 	for(int i = 0; i < this.isPressed.length; ++i) {
 	    if(joysticks[RIGHT].getRawButton(i + 1) && !this.isPressed[i]) {
@@ -257,7 +279,7 @@ public class Drive extends Component {
 	}
     }
 
-	protected void onEnd() {
+	protected void onEnd() { // Stop motors.
 		final Jaguar[] localMotors = motors;
 		final int length = localMotors.length;
 		
