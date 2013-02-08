@@ -2,6 +2,8 @@ package com.frc2013.rmr662.drive;
 
 import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
+import com.frc2013.rmr662.wrappers.RMRJaguar;
+
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
@@ -26,7 +28,7 @@ public class Drive extends Component {
     //public static final int LEFT_MOTOR = 0;
     //public static final int RIGHT_MOTOR = 1;
     
-    private Jaguar[] motors = new Jaguar[MOTOR_CHANNELS.length];
+    private RMRJaguar[] motors = new RMRJaguar[MOTOR_CHANNELS.length];
     private Joystick[] joysticks = new Joystick[MOTOR_CHANNELS.length];
     private Encoder[] encoders = new Encoder[ENCODER_CHANNELS_A.length];
     private PIDController[] controllers = new PIDController[MOTOR_CHANNELS.length];
@@ -49,12 +51,12 @@ public class Drive extends Component {
     public Drive () {
 	final HardwarePool pool = HardwarePool.getInstance();
 	for(int i = 0; i < MOTOR_CHANNELS.length; i++) {
-	    motors[i] = pool.getJaguar(MOTOR_CHANNELS[i]);
+	    motors[i] = pool.getJaguar(MOTOR_CHANNELS[i], 1.0);
 	    //encoders[i] = pool.getEncoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
 	    encoders[i] = new Encoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
 	    encoders[i].setDistancePerPulse(DISTANCE_PER_PULSE);
 	    encoders[i].setPIDSourceParameter(Encoder.PIDSourceParameter.kRate);
-	    controllers[i] = new PIDController(KP[i], KI[i], KD[i], encoders[i], motors[i]);
+	    controllers[i] = new PIDController(KP[i], KI[i], KD[i], encoders[i], motors[i].jag);
 	    encoders[i].start();
 	    controllers[i].setInputRange(-MAX_SPEED, MAX_SPEED);
 	    controllers[i].setOutputRange(-MAX_SPEED, MAX_SPEED);
@@ -280,7 +282,7 @@ public class Drive extends Component {
     }
 
 	protected void onEnd() { // Stop motors.
-		final Jaguar[] localMotors = motors;
+		final RMRJaguar[] localMotors = motors;
 		final int length = localMotors.length;
 		
 		for (int i = 0; i < length; i++) {

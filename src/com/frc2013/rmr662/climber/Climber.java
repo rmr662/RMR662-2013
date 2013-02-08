@@ -59,7 +59,7 @@ public class Climber extends Component {
 	public Climber() {
 		// initialize member variables
 		final HardwarePool pool = HardwarePool.getInstance();
-		motor = pool.getJaguar(MOTOR_PORT);
+		motor = pool.getJaguar(MOTOR_PORT, 1.0);
 		servo = pool.getServo(SERVO_PORT);
 		
 		topLimit = pool.getDigitalInput(SENSOR_LIMIT_TOP, false);

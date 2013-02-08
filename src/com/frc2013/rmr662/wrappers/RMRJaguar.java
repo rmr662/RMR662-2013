@@ -10,20 +10,21 @@ import edu.wpi.first.wpilibj.Jaguar;
  *
  * @author ROBOTics
  */
-public class RMRJaguar extends Jaguar {
-    public final double multiplier;
+public class RMRJaguar {
+    public final Jaguar jag;
+	public final double multiplier;
     
     public RMRJaguar(int channel, double multiplier) {
-	super(channel);
+	jag = new Jaguar(channel);
 	this.multiplier = multiplier;
     }
     
-    public RMRJaguar(int slot, int channel, double multiplier) {
-	super(slot, channel);
-	this.multiplier = multiplier;
+    public RMRJaguar(Jaguar jag, double multiplier) {
+    	this.jag = jag;
+    	this.multiplier = multiplier;
     }
     
     public void set(double speed) {
-	super.set(speed * multiplier);
+	jag.set(speed * multiplier);
     }
 }

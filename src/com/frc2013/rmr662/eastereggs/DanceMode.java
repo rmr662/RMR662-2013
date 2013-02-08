@@ -3,6 +3,8 @@ package com.frc2013.rmr662.eastereggs;
 import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.system.generic.RobotMode;
+import com.frc2013.rmr662.wrappers.RMRJaguar;
+
 import edu.wpi.first.wpilibj.Jaguar;
 
 public class DanceMode extends RobotMode {
@@ -15,12 +17,13 @@ public class DanceMode extends RobotMode {
 		private static final int MOTOR_CHANNEL_RIGHT = 2;
 		private static final double MOTOR_SPEED = 0.5;
 		
-		private final Jaguar leftMotor, rightMotor;
+		private final RMRJaguar leftMotor;
+		private final RMRJaguar rightMotor;
 		
 		public DanceDrive() {
 			HardwarePool pool = HardwarePool.getInstance();
-			leftMotor = pool.getJaguar(MOTOR_CHANNEL_LEFT);
-			rightMotor = pool.getJaguar(MOTOR_CHANNEL_RIGHT);
+			leftMotor = pool.getJaguar(MOTOR_CHANNEL_LEFT, 1.0);
+			rightMotor = pool.getJaguar(MOTOR_CHANNEL_RIGHT, 1.0);
 		}
 		
 		protected void onBegin() {
