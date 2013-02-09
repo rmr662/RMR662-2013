@@ -6,38 +6,38 @@ import edu.wpi.first.wpilibj.Solenoid;
  * @author Dan Mercer
  * 
  */
-public class RMRSolenoid extends Solenoid implements Invertable {
+public class RMRSolenoid {
 	public final boolean inverted;
+	public final Solenoid s;
 	
 	/**
 	 * @param channel
 	 * @param inverted
 	 */
 	public RMRSolenoid(int channel, boolean inverted) {
-		super(channel);
+		this.s = new Solenoid(channel);
 		this.inverted = inverted;
 	}
 
 	/**
-	 * @param moduleNumber
-	 * @param channel
-	 * @param inverted
+	 * @param s
+	 * @param inverted2
 	 */
-	public RMRSolenoid(int moduleNumber, int channel, boolean inverted) {
-		super(moduleNumber, channel);
+	public RMRSolenoid(Solenoid s, boolean inverted) {
+		this.s = s;
 		this.inverted = inverted;
 	}
 
 	public void set(boolean on) {
 		if (inverted) {
-			super.set(!on);
+			s.set(!on);
 		} else {
-			super.set(on);
+			s.set(on);
 		}
 	}
 
 	public boolean get() {
-		final boolean b = super.get();
+		final boolean b = s.get();
 		if (inverted) {
 			return !b;
 		} else {

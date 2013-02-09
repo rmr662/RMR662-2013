@@ -33,9 +33,11 @@ public class PneumaticManipulator extends Component {
 
     // Constructor
     public PneumaticManipulator() {
-	winglenoid = HardwarePool.getInstance().getSolenoid(WING_CHANNEL, false);
-	dumplenoid = HardwarePool.getInstance().getSolenoid(DUMPER_CHANNEL, false);
-	tiltlenoid = HardwarePool.getInstance().getSolenoid(TILT_CHANNEL, false);
+	final HardwarePool pool = HardwarePool.getInstance();
+	winglenoid = pool.getSolenoid(WING_CHANNEL, false);
+	dumplenoid = pool.getSolenoid(DUMPER_CHANNEL, false);
+	tiltlenoid = pool.getSolenoid(TILT_CHANNEL, false);
+	
 	xBoxController = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
 	tiltButton = new Button(xBoxController, TILT_BUTTON);
     }

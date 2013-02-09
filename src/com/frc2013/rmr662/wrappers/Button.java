@@ -3,10 +3,6 @@ package com.frc2013.rmr662.wrappers;
 
 import edu.wpi.first.wpilibj.Joystick;
 
-/**
- *
- * @author ROBOTics
- */
 public class Button {
     private final Joystick joystick;
     private final int button;

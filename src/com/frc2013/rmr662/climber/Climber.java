@@ -89,8 +89,8 @@ public class Climber extends Component {
 	public Climber(/*PneumaticsManipulator for wing*/) {
 		// initialize member variables
 		final HardwarePool pool = HardwarePool.getInstance();
-		
-		motor = pool.getJaguar(MOTOR_PORT); // Carriage motor
+
+		motor = pool.getJaguar(MOTOR_PORT, 1.0); // Carriage motor
 		servo = pool.getServo(SERVO_PORT); // Top carriage hook locking servo
 		
 		// Limit switches

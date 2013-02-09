@@ -6,8 +6,9 @@ package com.frc2013.rmr662.pneumatic;
 
 import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
+import com.frc2013.rmr662.wrappers.RMRDigitalInput;
+
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  *
@@ -20,7 +21,7 @@ public class PneumaticSystem extends Component {
     public static final int RELAY_CHANNEL = 1;
     
     private final Compressor compressor;
-    private final DigitalInput disableSwitch;
+    private final RMRDigitalInput disableSwitch;
     private boolean isRunning = false;
     
     public PneumaticSystem() {

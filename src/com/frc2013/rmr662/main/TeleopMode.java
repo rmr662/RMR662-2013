@@ -1,7 +1,6 @@
 package com.frc2013.rmr662.main;
 
-import com.frc2013.rmr662.drive.SimpleDrive;
-import com.frc2013.rmr662.pneumatic.PneumaticSystem;
+import com.frc2013.rmr662.drive.Drive;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.system.generic.RobotMode;
 
@@ -12,12 +11,12 @@ import com.frc2013.rmr662.system.generic.RobotMode;
 public class TeleopMode extends RobotMode {
     public static final int XBOX_JOYSTICK_PORT = 3;
     
-    private Component[] components = new Component[2];
+    private Component[] components = new Component[1];
 
     public TeleopMode() {
 	super("TeleopMode");
-	components[0] = new SimpleDrive();
-        components[1] = new PneumaticSystem();
+	components[0] = new Drive();
+//        components[1] = new PneumaticSystem();
     }
     
     protected void onBegin() {
