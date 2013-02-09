@@ -5,38 +5,43 @@ import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.Button;
 import com.frc2013.rmr662.wrappers.RMRSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 
 public class PneumaticManipulator extends Component {
     
     // Constants
-    private static final int WING_CHANNEL = 0;
+    private static final int WING_CHANNEL_EXTEND = 0;
+    private static final int WING_CHANNEL_RETRACT = 0; 
     
     private static final int DUMPER_CHANNEL = 1;
-    private static final int DUMPER_BUTTON = 2;
     
-    private static final int TILT_CHANNEL = 2;
+    private static final int TILT_CHANNEL_EXTEND = 4;
+    private static final int TILT_CHANNEL_RETRACT = 5;
+    
+    private static final int WING_BUTTON = 5;
+    private static final int DUMPER_BUTTON = 2;
     private static final int TILT_BUTTON = 3;
     
     // Fields
     private final Joystick xBoxController;
     private final Button tiltButton;
     
-    private final RMRSolenoid winglenoid;
+    private final DoubleSolenoid winglenoid;
     private boolean wingTarget = false;
     private boolean wingState = false;
     
     private final RMRSolenoid dumplenoid;
     private boolean dumpState = false;
     
-    private final RMRSolenoid tiltlenoid;
+    private final DoubleSolenoid tiltlenoid;
 
     // Constructor
     public PneumaticManipulator() {
 	final HardwarePool pool = HardwarePool.getInstance();
-	winglenoid = pool.getSolenoid(WING_CHANNEL, false);
+	winglenoid = new DoubleSolenoid(WING_CHANNEL_EXTEND, WING_CHANNEL_RETRACT);
 	dumplenoid = pool.getSolenoid(DUMPER_CHANNEL, false);
-	tiltlenoid = pool.getSolenoid(TILT_CHANNEL, false);
+	tiltlenoid = new DoubleSolenoid(TILT_CHANNEL_EXTEND, TILT_CHANNEL_RETRACT);
 	
 	xBoxController = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
 	tiltButton = new Button(xBoxController, TILT_BUTTON);
@@ -44,16 +49,21 @@ public class PneumaticManipulator extends Component {
     
     // Implemented (from superclass) methods
     protected void onBegin() {
-	winglenoid.set(false);
+	winglenoid.set(DoubleSolenoid.Value.kOff);
 	dumplenoid.set(false);
     }
 
     protected void update() { // Called repeatedly
 
 	// Wing
+	wingTarget = xBoxController.getRawButton(WING_BUTTON);
+	
 	if (wingTarget && !wingState) {
-	    winglenoid.set(wingTarget);
+	    winglenoid.set(DoubleSolenoid.Value.kForward);
 	    wingState = true;
+	} else if (!wingTarget && wingState) {
+	    winglenoid.set(DoubleSolenoid.Value.kReverse);
+	    wingState = false;
 	}
 
 	// Dumping
@@ -66,7 +76,12 @@ public class PneumaticManipulator extends Component {
 	// Tilt
 	if (tiltButton.wasPressed()) {
 	    // Toggle piston state
-	    tiltlenoid.set(!tiltlenoid.get());
+	    DoubleSolenoid.Value currentState = tiltlenoid.get();
+	    if (currentState == DoubleSolenoid.Value.kForward) {
+		tiltlenoid.set(DoubleSolenoid.Value.kReverse);
+	    } else {
+		tiltlenoid.set(DoubleSolenoid.Value.kForward);
+	    }
 	}
 	
     }
@@ -75,15 +90,5 @@ public class PneumaticManipulator extends Component {
 	// Called when robot is disabled. 
 	// Be sure to set hardware elements to safe states.
 	dumplenoid.set(false);
-    }
-    
-    // Public method(s)
-
-    /**
-     * Call this to extend the wings. Should be called from Climber or
-     * something.
-     */
-    public synchronized void extendWings() {
-	wingTarget = true;
     }
 }
