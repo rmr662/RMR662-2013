@@ -2,7 +2,6 @@
 package com.frc2013.rmr662.climber;
 
 import com.frc2013.rmr662.main.TeleopMode;
-import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.Button;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
@@ -74,19 +73,18 @@ public class NewClimber extends Component {
 	private long lastHookEngageTime = 0;
 	
 	public NewClimber() {
-		final HardwarePool pool = HardwarePool.getInstance();
-		motor = pool.getJaguar(MOTOR_CHANNEL, MOTOR_MULTIPLIER);
+		motor = new RMRJaguar(MOTOR_CHANNEL, MOTOR_MULTIPLIER);
 		
-		left = pool.getDigitalInput(LEFT_CHANNEL, false);
-		right = pool.getDigitalInput(RIGHT_CHANNEL, false);
+		left = new RMRDigitalInput(LEFT_CHANNEL, false);
+		right = new RMRDigitalInput(RIGHT_CHANNEL, false);
 		
-		top = pool.getDigitalInput(TOP_CHANNEL, false);
-		bottom = pool.getDigitalInput(BOTTOM_CHANNEL, false);
+		top = new RMRDigitalInput(TOP_CHANNEL, false);
+		bottom = new RMRDigitalInput(BOTTOM_CHANNEL, false);
 		
 		xbox = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
 		modeButton = new Button(xbox, MODE_BUTTON);
 		
-		servo = pool.getServo(SERVO_CHANNEL);
+		servo = new Servo(SERVO_CHANNEL);
 		servoButton = new Button(xbox, SERVO_BUTTON);
 	}
 	

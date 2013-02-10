@@ -4,7 +4,6 @@
  */
 package com.frc2013.rmr662.pneumatic;
 
-import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
 
@@ -26,8 +25,8 @@ public class PneumaticSystem extends Component {
     
     public PneumaticSystem() {
         super();
-        compressor = HardwarePool.getInstance().getCompressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
-        disableSwitch = HardwarePool.getInstance().getDigitalInput(6, false);
+        compressor = new Compressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
+        disableSwitch = new RMRDigitalInput(6, false);
     }
     
     protected void onBegin() {

@@ -1,11 +1,9 @@
 package com.frc2013.rmr662.drive;
 
-import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRJaguar;
 
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
 
@@ -49,14 +47,13 @@ public class Drive extends Component {
     private boolean tuningEnabled = false;
     
     public Drive () {
-	final HardwarePool pool = HardwarePool.getInstance();
 	for(int i = 0; i < MOTOR_CHANNELS.length; i++) {
-	    motors[i] = pool.getJaguar(MOTOR_CHANNELS[i], 1.0);
+	    motors[i] = new RMRJaguar(MOTOR_CHANNELS[i], 1.0);
 	    //encoders[i] = pool.getEncoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
 	    encoders[i] = new Encoder(ENCODER_CHANNELS_A[i], ENCODER_CHANNELS_B[i]);
 	    encoders[i].setDistancePerPulse(DISTANCE_PER_PULSE);
 	    encoders[i].setPIDSourceParameter(Encoder.PIDSourceParameter.kRate);
-	    controllers[i] = new PIDController(KP[i], KI[i], KD[i], encoders[i], motors[i].jag);
+	    controllers[i] = new PIDController(KP[i], KI[i], KD[i], encoders[i], motors[i]);
 	    encoders[i].start();
 	    controllers[i].setInputRange(-MAX_SPEED, MAX_SPEED);
 	    controllers[i].setOutputRange(-MAX_SPEED, MAX_SPEED);

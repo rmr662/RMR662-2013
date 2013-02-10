@@ -1,6 +1,5 @@
 package com.frc2013.rmr662.climber;
 import com.frc2013.rmr662.main.TeleopMode;
-import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRDigitalInput;
 import com.frc2013.rmr662.wrappers.RMRJaguar;
@@ -88,22 +87,21 @@ public class Climber extends Component {
 	
 	public Climber(/*PneumaticsManipulator for wing*/) {
 		// initialize member variables
-		final HardwarePool pool = HardwarePool.getInstance();
-
-		motor = pool.getJaguar(MOTOR_PORT, 1.0); // Carriage motor
-		servo = pool.getServo(SERVO_PORT); // Top carriage hook locking servo
+		
+		motor = new RMRJaguar(MOTOR_PORT, 1.0); // Carriage motor
+		servo = new Servo(SERVO_PORT); // Top carriage hook locking servo
 		
 		// Limit switches
-		topLimit = pool.getDigitalInput(SENSOR_LIMIT_TOP, false);
-		bottomLimit = pool.getDigitalInput(SENSOR_LIMIT_BOTTOM, false);
+		topLimit = new RMRDigitalInput(SENSOR_LIMIT_TOP, false);
+		bottomLimit = new RMRDigitalInput(SENSOR_LIMIT_BOTTOM, false);
 		
 		// Vertical pairs of fixed hooks (ORed together)
-		leftFixed = pool.getDigitalInput(SENSOR_FIXED_LEFT, false);
-		rightFixed = pool.getDigitalInput(SENSOR_FIXED_RIGHT, false);
+		leftFixed = new RMRDigitalInput(SENSOR_FIXED_LEFT, false);
+		rightFixed = new RMRDigitalInput(SENSOR_FIXED_RIGHT, false);
 		
 		// Top carriage hooks (bottom have no useful input)
-		leftCarriage = pool.getDigitalInput(SENSOR_CARRIAGE_LEFT, false);
-		rightCarriage = pool.getDigitalInput(SENSOR_CARRIAGE_RIGHT, false);
+		leftCarriage = new RMRDigitalInput(SENSOR_CARRIAGE_LEFT, false);
+		rightCarriage = new RMRDigitalInput(SENSOR_CARRIAGE_RIGHT, false);
 		
 		// Xbox controller (joystick)
 		joystick = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);

@@ -1,7 +1,6 @@
 package com.frc2013.rmr662.drive;
 
 import com.frc2013.rmr662.main.TeleopMode;
-import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRJaguar;
 
@@ -17,9 +16,8 @@ public class SimpleDrive extends Component {
     private Joystick xbox;
     
     public SimpleDrive () {
-        final HardwarePool pool = HardwarePool.getInstance();
-	left = pool.getJaguar(LEFT_PORT, 1.0);
-	right = pool.getJaguar(RIGHT_PORT, 1.0);
+	left = new RMRJaguar(LEFT_PORT, 1.0);
+	right = new RMRJaguar(RIGHT_PORT, 1.0);
 	
 	xbox = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
     }

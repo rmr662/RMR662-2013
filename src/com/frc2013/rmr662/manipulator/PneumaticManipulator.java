@@ -1,7 +1,6 @@
 package com.frc2013.rmr662.manipulator;
 
 import com.frc2013.rmr662.main.TeleopMode;
-import com.frc2013.rmr662.system.HardwarePool;
 import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.Button;
 import com.frc2013.rmr662.wrappers.RMRSolenoid;
@@ -38,9 +37,8 @@ public class PneumaticManipulator extends Component {
 
     // Constructor
     public PneumaticManipulator() {
-	final HardwarePool pool = HardwarePool.getInstance();
 	winglenoid = new DoubleSolenoid(WING_CHANNEL_EXTEND, WING_CHANNEL_RETRACT);
-	dumplenoid = pool.getSolenoid(DUMPER_CHANNEL, false);
+	dumplenoid = new RMRSolenoid(DUMPER_CHANNEL, false);
 	tiltlenoid = new DoubleSolenoid(TILT_CHANNEL_EXTEND, TILT_CHANNEL_RETRACT);
 	
 	xBoxController = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
