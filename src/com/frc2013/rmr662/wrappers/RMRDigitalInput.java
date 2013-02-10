@@ -6,26 +6,30 @@ import edu.wpi.first.wpilibj.DigitalInput;
  * @author Dan Mercer
  *
  */
-public class RMRDigitalInput {
+public class RMRDigitalInput extends DigitalInput implements Invertable {
 	public final boolean inverted;
-	public final DigitalInput di;
 
 	/**
 	 * @param channel
 	 * @param inverted
 	 */
 	public RMRDigitalInput(int channel, boolean inverted) {
-		this.di = new DigitalInput(channel);
-		this.inverted = inverted;
+		super(channel);
+		this.inverted = true;
 	}
-	
-	public RMRDigitalInput(DigitalInput di, boolean inverted) {
-		this.di = di;
+
+	/**
+	 * @param moduleNumber
+	 * @param channel
+	 * @param inverted
+	 */
+	public RMRDigitalInput(int moduleNumber, int channel, boolean inverted) {
+		super(moduleNumber, channel);
 		this.inverted = inverted;
 	}
 
 	public boolean get() {
-		final boolean b = di.get();
+		final boolean b = super.get();
 		if (inverted) {
 			return !b;
 		} else {
