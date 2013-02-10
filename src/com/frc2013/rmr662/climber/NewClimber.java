@@ -32,13 +32,13 @@ public class NewClimber extends Component {
 	// Hook input channels
 	private final int LEFT_CHANNEL = 1;
 	private final int RIGHT_CHANNEL = 2;
-	private final int TOP_CHANNEL = 3;
-	private final int BOTTOM_CHANNEL = 4;
+	private final int TOP_CHANNEL = 14;
+	private final int BOTTOM_CHANNEL = 12;
 	
 	// button indices
-	private final int MODE_BUTTON = 6;
-	private final int ABORT_BUTTON = 4;
-	private final int SERVO_BUTTON = 5;
+	private final int MODE_BUTTON = 1;
+	private final int ABORT_BUTTON = 2;
+	private final int SERVO_BUTTON = 3;
 	private final int OPERATOR_CONTROL_AXIS = 3;
 	
 	// Hardware stuff
@@ -47,9 +47,10 @@ public class NewClimber extends Component {
 	private final RMRDigitalInput top;
 	private final RMRDigitalInput bottom;
 	private final RMRJaguar motor;
+	private final Servo servo;
+	
 	private final Joystick xbox;
 	private final Button modeButton;
-	private final Servo servo;
 	private final Button servoButton;
 	
 	// Last hook states
@@ -103,11 +104,13 @@ public class NewClimber extends Component {
 	private void setServoState(boolean locked) {
 		if (locked && !servoLocked) {
 			SmartDashboard.putBoolean("servo_is_locked", true);
+			System.out.println("servo_locked = true");
 			servo.set(SERVO_LOCK);
 			servoLocked = true;
 			
 		} else if (!locked && servoLocked) {
 			SmartDashboard.putBoolean("servo_is_locked", false);
+			System.out.println("servo_locked = true");
 			servo.set(SERVO_UNLOCK);
 			servoLocked = false;
 			
@@ -136,10 +139,12 @@ public class NewClimber extends Component {
 		final boolean rightOn = right.get();
 		if (leftOn != leftOnLast) {
 			SmartDashboard.putBoolean("left_hook_state", leftOn);
+			System.out.println("left = " + leftOn);
 			leftOnLast = leftOn;
 		}
 		if (rightOn != rightOnLast) {
 			SmartDashboard.putBoolean("right_hook_state", rightOn);
+			System.out.println("right = " + rightOn);
 			rightOnLast = rightOn;
 		}
 		return leftOn && rightOn;
@@ -177,6 +182,7 @@ public class NewClimber extends Component {
 	protected void update() {
 		
 		if (xbox.getRawButton(ABORT_BUTTON)) {
+		    System.out.println("ABORT!");
 			motor.set(0.0);
 			end();
 			return;
@@ -184,6 +190,7 @@ public class NewClimber extends Component {
 		
 		if (modeButton.wasPressed()) {
 			toggleMode();
+		    System.out.println("Toggle mode. isAutoMode = " + isInAutoMode);
 		}
 		
 		if (!climbing && areBothHooksOn()) {
@@ -206,6 +213,12 @@ public class NewClimber extends Component {
 
 	protected void onEnd() {
 		motor.set(0.0);
+		motor.free();
+		servo.free();
+		top.free();
+		bottom.free();
+		left.free();
+		right.free();
 	}
 	
 }
