@@ -32,7 +32,9 @@ public class SimpleDrive extends Component {
     
     protected void onEnd() {
         left.set(0);
+        left.free();
         right.set(0);
+        right.free();
     }
     
 }

@@ -278,12 +278,18 @@ public class Drive extends Component {
 	}
     }
 
-	protected void onEnd() { // Stop motors.
-		final RMRJaguar[] localMotors = motors;
-		final int length = localMotors.length;
+	protected void onEnd() { // Stop and free hardware elements
 		
-		for (int i = 0; i < length; i++) {
-			localMotors[i].set(0.0);
+		final int motorCount = motors.length;
+		for (int i = 0; i < motorCount; i++) {
+			motors[i].set(0.0);
+			motors[i].free();
+		}
+		
+		final int encoderCount = encoders.length;
+		for (int i = 0; i < encoderCount; i++) {
+			encoders[i].stop(); // Not sure if this line is necessary.
+			encoders[i].free();
 		}
 	}
 }

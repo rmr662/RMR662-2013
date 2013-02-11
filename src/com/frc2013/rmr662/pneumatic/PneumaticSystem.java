@@ -21,23 +21,11 @@ public class PneumaticSystem extends Component {
     
     private final Compressor compressor;
     private final RMRDigitalInput disableSwitch;
-    private boolean isRunning = false;
     
     public PneumaticSystem() {
         super();
         compressor = new Compressor(PRESSURE_SWITCH_CHANNEL, RELAY_CHANNEL);
         disableSwitch = new RMRDigitalInput(6, false);
-    }
-    
-    protected void onBegin() {
-        
-    }
-    
-    protected void onEnd() {
-        if (compressor.enabled()) {
-            System.out.println("Stopping compressor.");
-            compressor.stop();
-        }
     }
     
     protected void update() {
@@ -49,5 +37,14 @@ public class PneumaticSystem extends Component {
         if (!(disableSwitch.get() || compressor.enabled())) {
             compressor.start();
         }
+    }
+    
+    protected void onEnd() {
+    	if (compressor.enabled()) {
+    		System.out.println("Stopping compressor.");
+    		compressor.stop();
+    	}
+    	compressor.free();
+    	disableSwitch.free();
     }
 }

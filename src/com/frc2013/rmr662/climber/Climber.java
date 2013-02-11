@@ -475,5 +475,14 @@ public class Climber extends Component {
 	 */
 	public void onEnd() {
 		motor.set(0.0);
+		
+		motor.free();
+		bottomLimit.free();
+		topLimit.free();
+		leftCarriage.free();
+		rightCarriage.free();
+		leftFixed.free();
+		rightFixed.free();
+		servo.free();
 	}
 }

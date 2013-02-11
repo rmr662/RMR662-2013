@@ -88,5 +88,8 @@ public class PneumaticManipulator extends Component {
 	// Called when robot is disabled. 
 	// Be sure to set hardware elements to safe states.
 	dumplenoid.set(false);
+	dumplenoid.free();
+	tiltlenoid.free();
+	winglenoid.free();
     }
 }

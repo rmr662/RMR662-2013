@@ -33,7 +33,9 @@ public class DanceMode extends RobotMode {
 		
 		protected void onEnd() {
 			leftMotor.set(0.0);
+			leftMotor.free();
 			rightMotor.set(0.0);
+			rightMotor.free();
 		}
 	}
 	
@@ -59,6 +61,9 @@ public class DanceMode extends RobotMode {
 //		
 //		public void onEnd() {
 //			motor.set(0);
+//			motor.free();
+//			top.free();
+//			bottom.free();
 //		}
 //	}
 	

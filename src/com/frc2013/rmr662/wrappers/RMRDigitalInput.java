@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
  * @author Dan Mercer
  *
  */
-public class RMRDigitalInput extends DigitalInput implements Invertable {
+public class RMRDigitalInput extends DigitalInput {
 	public final boolean inverted;
 
 	/**
@@ -35,10 +35,6 @@ public class RMRDigitalInput extends DigitalInput implements Invertable {
 		} else {
 			return b;
 		}
-	}
-
-	public boolean isInverted() {
-		return inverted;
 	}
 	
 }

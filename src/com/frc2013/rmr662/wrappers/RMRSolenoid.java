@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Solenoid;
  * @author Dan Mercer
  * 
  */
-public class RMRSolenoid extends Solenoid implements Invertable {
+public class RMRSolenoid extends Solenoid {
 	public final boolean inverted;
 	
 	/**
@@ -43,10 +43,6 @@ public class RMRSolenoid extends Solenoid implements Invertable {
 		} else {
 			return b;
 		}
-	}
-
-	public boolean isInverted() {
-		return inverted;
 	}
 	
 }
