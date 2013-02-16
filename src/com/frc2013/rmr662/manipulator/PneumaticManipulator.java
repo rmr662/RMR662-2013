@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.Joystick;
 public class PneumaticManipulator extends Component {
     
     // Constants
-    private static final int WING_CHANNEL_EXTEND = 0;
-    private static final int WING_CHANNEL_RETRACT = 0; 
+    private static final int WING_CHANNEL_EXTEND = 2;
+    private static final int WING_CHANNEL_RETRACT = 3; 
     
     private static final int DUMPER_CHANNEL = 1;
     
@@ -20,10 +20,10 @@ public class PneumaticManipulator extends Component {
     
     private static final int WING_BUTTON = 5;
     private static final int DUMPER_BUTTON = 2;
-    private static final int TILT_BUTTON = 3;
+    private static final int TILT_BUTTON = 1;
     
     // Fields
-    private final Joystick xBoxController;
+    private final Joystick controller;
     private final Button tiltButton;
     
     private final DoubleSolenoid winglenoid;
@@ -41,20 +41,21 @@ public class PneumaticManipulator extends Component {
 	dumplenoid = new RMRSolenoid(DUMPER_CHANNEL, false);
 	tiltlenoid = new DoubleSolenoid(TILT_CHANNEL_EXTEND, TILT_CHANNEL_RETRACT);
 	
-	xBoxController = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
-	tiltButton = new Button(xBoxController, TILT_BUTTON);
+	controller = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
+	tiltButton = new Button(controller, TILT_BUTTON);
     }
     
     // Implemented (from superclass) methods
     protected void onBegin() {
 	winglenoid.set(DoubleSolenoid.Value.kOff);
+        tiltlenoid.set(DoubleSolenoid.Value.kReverse);
 	dumplenoid.set(false);
     }
 
     protected void update() { // Called repeatedly
 
 	// Wing
-	wingTarget = xBoxController.getRawButton(WING_BUTTON);
+	wingTarget = controller.getRawButton(WING_BUTTON);
 	
 	if (wingTarget && !wingState) {
 	    winglenoid.set(DoubleSolenoid.Value.kForward);
@@ -65,7 +66,7 @@ public class PneumaticManipulator extends Component {
 	}
 
 	// Dumping
-	boolean dumperTarget = xBoxController.getRawButton(DUMPER_BUTTON);
+	boolean dumperTarget = controller.getRawButton(DUMPER_BUTTON);
 	if (dumpState != dumperTarget) {
 	    dumplenoid.set(dumperTarget);
 	    dumpState = dumperTarget;

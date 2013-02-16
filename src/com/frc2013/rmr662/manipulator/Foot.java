@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.Servo;
  */
 public class Foot extends Component {
     
-    private DoubleSolenoid footSolenoid;
     private Joystick controller;
     private Carriage carriage;
     
@@ -51,24 +50,16 @@ public class Foot extends Component {
     }
     
     public Foot() {
-	footSolenoid = new DoubleSolenoid(4, 5);
 	controller = new Joystick(3);
         carriage = new Carriage(3, 1.0);
     }
     
     protected void update() {
-	if (controller.getRawButton(1)) {
-	    footSolenoid.set(DoubleSolenoid.Value.kForward);
-	} else {
-	    footSolenoid.set(DoubleSolenoid.Value.kReverse);
-	}
-	
 	double speed = controller.getRawAxis(3);
         carriage.set(speed);
     }
     
     protected void onEnd() {
-	footSolenoid.free();
         carriage.free();
     }
     
