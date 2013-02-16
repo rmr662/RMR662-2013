@@ -38,11 +38,12 @@ public class PneumaticSystem extends Component {
             System.out.println("Stopping compressor.");
             compressor.stop();
         }
+	
+	compressor.free();
+	disableSwitch.free();
     }
     
     protected void update() {
-        System.out.println("Compressor Update");
-        System.out.flush();
         if (disableSwitch.get() && compressor.enabled()) {
             compressor.stop();
         }
