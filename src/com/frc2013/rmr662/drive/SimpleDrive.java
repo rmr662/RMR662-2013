@@ -5,6 +5,7 @@ import com.frc2013.rmr662.system.generic.Component;
 import com.frc2013.rmr662.wrappers.RMRJaguar;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotDrive;
 
 /** Drive Component */
 public class SimpleDrive extends Component {
@@ -15,24 +16,27 @@ public class SimpleDrive extends Component {
     private RMRJaguar left, right;
     private Joystick xbox;
     
+    private RobotDrive robotDrive;
+    
     public SimpleDrive () {
 	left = new RMRJaguar(LEFT_PORT, 1.0);
 	right = new RMRJaguar(RIGHT_PORT, 1.0);
 	
 	xbox = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
+	
+	robotDrive = new RobotDrive(left, right);
     }
     
     public synchronized void update() {
-        final double yAxis = xbox.getRawAxis(2);
-        final double xAxis = xbox.getRawAxis(4);
-        
-	left.set(-(yAxis + xAxis) / 3);
-        right.set(-(yAxis - xAxis) / 3);
+        robotDrive.arcadeDrive(xbox, 4, xbox, 2, true);
     }
     
     protected void onEnd() {
         left.set(0);
         right.set(0);
+	left.free();
+	right.free();
+	robotDrive.free();
     }
     
 }
