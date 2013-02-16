@@ -15,7 +15,7 @@ public class RMRDigitalInput extends DigitalInput {
 	 */
 	public RMRDigitalInput(int channel, boolean inverted) {
 		super(channel);
-		this.inverted = true;
+		this.inverted = inverted;
 	}
 
 	/**
