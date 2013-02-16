@@ -34,6 +34,9 @@ public class DanceMode extends RobotMode {
 		protected void onEnd() {
 			leftMotor.set(0.0);
 			rightMotor.set(0.0);
+			
+			leftMotor.free();
+			rightMotor.free();
 		}
 	}
 	
