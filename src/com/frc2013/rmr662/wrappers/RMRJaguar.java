@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Jaguar;
  * @author ROBOTics
  */
 public class RMRJaguar extends Jaguar {
-    public final double multiplier;
+    private double multiplier;
     
     public RMRJaguar(int channel, double multiplier) {
 	super(channel);
@@ -25,5 +25,9 @@ public class RMRJaguar extends Jaguar {
     
     public void set(double speed) {
 	super.set(speed * multiplier);
+    }
+    
+    public void set(double speed, byte syncGroup) {
+	this.set(speed);
     }
 }
