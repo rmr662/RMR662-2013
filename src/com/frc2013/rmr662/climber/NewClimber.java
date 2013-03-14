@@ -1,4 +1,3 @@
-
 package com.frc2013.rmr662.climber;
 
 import com.frc2013.rmr662.main.TeleopMode;
@@ -110,7 +109,7 @@ public class NewClimber extends Component {
 			
 		} else if (!locked && servoLocked) {
 			SmartDashboard.putBoolean("servo_is_locked", false);
-			System.out.println("servo_locked = true");
+			System.out.println("servo_locked = false");
 			servo.set(SERVO_UNLOCK);
 			servoLocked = false;
 			
