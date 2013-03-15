@@ -6,7 +6,7 @@ import com.frc2013.rmr662.system.generic.RobotMode;
 public class MainRobot extends Robot {
 
 	protected RobotMode getAutoMode() {
-		return null;// new DanceMode(); // No autonomous mode this season :(
+		return new AutoMode();// new DanceMode(); // No autonomous mode this season :(
 	}
 
 	protected RobotMode getTeleopMode() {
