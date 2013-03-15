@@ -41,7 +41,7 @@ public class PneumaticManipulator extends Component {
 	dumplenoid = new RMRSolenoid(DUMPER_CHANNEL, false);
 	tiltlenoid = new DoubleSolenoid(TILT_CHANNEL_EXTEND, TILT_CHANNEL_RETRACT);
 	
-	controller = new Joystick(TeleopMode.XBOX_JOYSTICK_PORT);
+	controller = new Joystick(1);
 	tiltButton = new Button(controller, TILT_BUTTON);
     }
     
