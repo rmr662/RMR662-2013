@@ -21,6 +21,7 @@ public class AutoMode extends RobotMode {
     private DoubleSolenoid dumper;
     
     public static final double SPEED = -0.55;
+    public static final int DELAY = 5500;
     
     public AutoMode() {
         super("Autonomous");
@@ -34,7 +35,7 @@ public class AutoMode extends RobotMode {
         leftMotor.set(SPEED);
         rightMotor.set(SPEED);
         try {
-            Thread.sleep(7000);
+            Thread.sleep(DELAY);
         } catch (Exception e) {
             e.printStackTrace();
         }
