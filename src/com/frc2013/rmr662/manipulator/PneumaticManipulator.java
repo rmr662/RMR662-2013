@@ -18,8 +18,8 @@ public class PneumaticManipulator extends Component {
     private static final int TILT_CHANNEL_EXTEND = 4;
     private static final int TILT_CHANNEL_RETRACT = 5;
     
-    private static final int WING_BUTTON = 5;
-    private static final int DUMPER_BUTTON = 3;
+    private static final int WING_BUTTON = 3;
+    private static final int DUMPER_BUTTON = 5;
     private static final int TILT_BUTTON = 1;
     
     // Fields
