@@ -5,10 +5,9 @@
 package com.frc2013.rmr662.manipulator;
 
 import com.frc2013.rmr662.system.generic.Component;
-import com.frc2013.rmr662.wrappers.RMRJaguar;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Talon;
 
 /**
  *
@@ -19,7 +18,7 @@ public class Foot extends Component {
     private Joystick controller;
     private Carriage carriage;
     
-    private class Carriage extends RMRJaguar {
+    private class Carriage extends Talon {
         
         private Servo lockingServo;
         
@@ -27,7 +26,7 @@ public class Foot extends Component {
         private static final double SERVO_UNLOCK = SERVO_LOCK + 0.6;
         
         public Carriage(int channel, double multiplier) {
-            super(channel, multiplier);
+            super(channel);
             lockingServo = new Servo(4);
         }
         
@@ -50,12 +49,12 @@ public class Foot extends Component {
     }
     
     public Foot() {
-	controller = new Joystick(3);
+	controller = new Joystick(1);
         carriage = new Carriage(3, 1.0);
     }
     
     protected void update() {
-	double speed = controller.getRawAxis(3);
+	double speed = controller.getRawAxis(2);
         carriage.set(speed);
     }
     
